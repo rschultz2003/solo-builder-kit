@@ -20,6 +20,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
+<!-- Orb physics. Shared byte-for-byte with /playbook so the two cannot drift. -->
+<script src="/orbs.js" defer></script>
+
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -108,6 +111,17 @@ p{margin:0 0 18px}
   background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.9) 0%,rgba(255,214,203,.55) 45%,rgba(255,146,128,.35) 100%);
   backdrop-filter:blur(2px);
 }
+/* ORB LAYER — keep identical to /playbook. Behaviour lives in /orbs.js.
+   The authored .orb elements become invisible layout anchors; the live
+   orbs are cloned into one fixed, full-viewport layer so they can travel
+   past section edges. The layer never swallows a click; each orb does. */
+.orb-layer{position:fixed;inset:0;z-index:5;pointer-events:none}
+.orb-anchor{visibility:hidden}
+.orb-live{
+  position:absolute;left:0;top:0;pointer-events:auto;touch-action:none;cursor:grab;
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;
+}
+.orb-live.grabbed{cursor:grabbing}
 
 /* ============================================================
    NAV
@@ -521,17 +535,10 @@ var FORM_ENDPOINT = ""; // <-- paste your Loops form endpoint here
     items.forEach(function (el) { io.observe(el); });
   }
 
-  /* ---- orb parallax (rAF throttled) ---- */
-  var orbs = [].slice.call(document.querySelectorAll(".hero-orbs .orb"));
+  /* ---- sticky nav (rAF throttled).
+         Orb transforms are owned exclusively by /orbs.js. ---- */
   var ticking = false;
   function frame() {
-    var y = window.scrollY;
-    if (!reduced) {
-      orbs.forEach(function (o) {
-        var d = parseFloat(o.getAttribute("data-depth")) || 0.15;
-        o.style.transform = "translate3d(0," + (-y * d).toFixed(1) + "px,0)";
-      });
-    }
     onScrollNav();
     ticking = false;
   }

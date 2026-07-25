@@ -19,6 +19,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
+<!-- Orb physics. Shared byte-for-byte with / so the two cannot drift. -->
+<script src="/orbs.js" defer></script>
+
 <style>
 /* Tokens are identical to / — keep them in sync. See DESIGN.md. */
 :root{
@@ -77,6 +80,17 @@ p{margin:0 0 20px}
 .orb-a{background:radial-gradient(circle at 32% 28%,#FF8A72 0%,#FF5A4E 46%,#D93A2E 100%)}
 .orb-b{background:radial-gradient(circle at 32% 28%,#FFD2BE 0%,#FFB39A 48%,#F08F6E 100%)}
 .orb-c{background:radial-gradient(circle at 32% 28%,#A79CFF 0%,#7C6CF5 48%,#5B4AD1 100%)}
+/* ORB LAYER — keep identical to /playbook. Behaviour lives in /orbs.js.
+   The authored .orb elements become invisible layout anchors; the live
+   orbs are cloned into one fixed, full-viewport layer so they can travel
+   past section edges. The layer never swallows a click; each orb does. */
+.orb-layer{position:fixed;inset:0;z-index:5;pointer-events:none}
+.orb-anchor{visibility:hidden}
+.orb-live{
+  position:absolute;left:0;top:0;pointer-events:auto;touch-action:none;cursor:grab;
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;
+}
+.orb-live.grabbed{cursor:grabbing}
 
 /* ---- hero ---- */
 .hero{position:relative;padding:80px 0 84px;overflow:hidden;text-align:center}
@@ -336,7 +350,6 @@ var FORM_ENDPOINT = ""; // <-- paste your Loops form endpoint here
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var nav = document.getElementById("nav");
   var bar = document.getElementById("progress");
-  var orbs = [].slice.call(document.querySelectorAll(".hero-orbs .orb"));
 
   /* ---- accordions (height-animated, keyboard + a11y correct) ---- */
   [].forEach.call(document.querySelectorAll(".acc-btn"), function (btn) {
@@ -372,19 +385,14 @@ var FORM_ENDPOINT = ""; // <-- paste your Loops form endpoint here
     items.forEach(function (el) { io.observe(el); });
   }
 
-  /* ---- scroll: progress + nav + parallax ---- */
+  /* ---- scroll: progress + nav.
+         Orb transforms are owned exclusively by /orbs.js. ---- */
   var ticking = false;
   function frame() {
     var y = window.scrollY;
     var h = document.documentElement.scrollHeight - window.innerHeight;
     bar.style.width = (h > 0 ? (y / h) * 100 : 0) + "%";
     nav.classList.toggle("stuck", y > 8);
-    if (!reduced) {
-      orbs.forEach(function (o) {
-        var d = parseFloat(o.getAttribute("data-depth")) || 0.15;
-        o.style.transform = "translate3d(0," + (-y * d).toFixed(1) + "px,0)";
-      });
-    }
     ticking = false;
   }
   window.addEventListener("scroll", function () {
