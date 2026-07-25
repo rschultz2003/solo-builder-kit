@@ -185,6 +185,7 @@
     if (speed < SLEEP_V && Math.abs(o.px) < SLEEP_P && Math.abs(o.py) < SLEEP_P) {
       o.px = 0; o.py = 0; o.vx = 0; o.vy = 0;
       o.asleep = true;
+      o.el.style.willChange = "";           /* holding a layer per orb costs GPU memory */
     }
   }
 
@@ -269,6 +270,7 @@
     pushSample(o, e.clientX, e.clientY, performance.now());
 
     o.el.classList.add("grabbed");
+    o.el.style.willChange = "transform";    /* only while in play; cleared on sleep */
     try { o.el.setPointerCapture(e.pointerId); } catch (err) {}
     e.preventDefault();                    /* no text-selection drag */
     wake();
