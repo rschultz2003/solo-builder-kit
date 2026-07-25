@@ -159,6 +159,15 @@ p{margin:0 0 20px}
 .part-num{font-family:var(--mono);font-size:13px;letter-spacing:.16em;color:var(--coral-deep)}
 
 /* ---- accordions ---- */
+/* quiet text control: it must not compete with "Get the PDF" */
+.acc-tools{display:flex;justify-content:flex-end;margin-top:30px;margin-bottom:-16px}
+.acc-all{
+  background:none;border:0;padding:6px 2px;cursor:pointer;
+  font-family:var(--mono);font-size:11.5px;font-weight:500;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  transition:color .2s;
+}
+.acc-all:hover{color:var(--coral-deep)}
 .acc{border-top:1px solid var(--hair);margin-top:34px}
 .acc-item{border-bottom:1px solid var(--hair)}
 .acc-btn{
@@ -293,6 +302,10 @@ footer{padding:56px 0 48px;border-top:1px solid var(--hair)}
     <h2>The foundation</h2>
     <p class="lede" style="margin-top:20px">Most mindset content is useless. These five are not motivation. They are the mental models that decide whether you make it or quit.</p>
 
+    <div class="acc-tools">
+      <button class="acc-all" id="accAll" type="button" aria-controls="acc">Expand all</button>
+    </div>
+
     <div class="acc" id="acc">
 
       <div class="acc-item">
@@ -412,47 +425,80 @@ var FORM_ENDPOINT = ""; // <-- paste your Loops form endpoint here
      Now: any pending latch is dropped at the start of every toggle, the
      handler filters on target and propertyName, and it re-checks
      aria-expanded before latching, so a stale event can never open a
-     panel that is meant to be closed. */
-  [].forEach.call(document.querySelectorAll(".acc-btn"), function (btn) {
-    var panel = btn.nextElementSibling;
-    var inner = panel.firstElementChild;
+     panel that is meant to be closed.
 
-    /* inert takes the subtree out of BOTH the tab order and the
-       accessibility tree without touching layout, so the height animation
-       is unaffected. Not display:none or visibility:hidden: those suppress
-       rendering, which also hides the text from find-in-page. */
-    if (btn.getAttribute("aria-expanded") !== "true") panel.inert = true;
-
-    function settle(e) {
-      if (e && (e.target !== panel || e.propertyName !== "height")) return;
-      panel.removeEventListener("transitionend", settle);
-      if (btn.getAttribute("aria-expanded") === "true") {
-        panel.style.height = "auto";       /* so it reflows with the viewport */
+     Collapsed panels are `inert`, which takes their contents out of both
+     the tab order and the accessibility tree without touching layout, so
+     the height animation is unaffected. inert rather than display:none
+     or visibility:hidden: those suppress rendering, which also takes the
+     text away from find-in-page. */
+  var accs = [].map.call(document.querySelectorAll(".acc-btn"), function (btn) {
+    var rec = { btn: btn, panel: btn.nextElementSibling };
+    rec.inner = rec.panel.firstElementChild;
+    rec.settle = function (e) {
+      if (e && (e.target !== rec.panel || e.propertyName !== "height")) return;
+      rec.panel.removeEventListener("transitionend", rec.settle);
+      if (rec.btn.getAttribute("aria-expanded") === "true") {
+        rec.panel.style.height = "auto";   /* so it reflows with the viewport */
       } else {
-        panel.inert = true;                /* only once it is fully closed */
+        rec.panel.inert = true;            /* only once it is fully closed */
       }
+    };
+    if (btn.getAttribute("aria-expanded") !== "true") rec.panel.inert = true;
+    return rec;
+  });
+
+  function isOpen(rec) { return rec.btn.getAttribute("aria-expanded") === "true"; }
+
+  /* animate === false snaps, which is what the bulk control uses: nineteen
+     simultaneous height transitions jank badly. Normal animated behaviour
+     resumes for individual toggles straight afterwards. */
+  function setPanel(rec, open, animate) {
+    var panel = rec.panel;
+    rec.btn.setAttribute("aria-expanded", open ? "true" : "false");
+    panel.removeEventListener("transitionend", rec.settle);
+
+    if (open) panel.inert = false;         /* clear before it becomes reachable */
+
+    if (!animate || reduced) {
+      panel.style.transition = "none";
+      panel.style.height = open ? "auto" : "0px";
+      void panel.offsetHeight;             /* commit with the transition off */
+      panel.style.transition = "";
+      if (!open) panel.inert = true;
+      return;
     }
 
-    btn.addEventListener("click", function () {
-      var open = btn.getAttribute("aria-expanded") === "true";
-      btn.setAttribute("aria-expanded", open ? "false" : "true");
-      panel.removeEventListener("transitionend", settle);
+    panel.style.height = panel.getBoundingClientRect().height + "px";  /* pin where it is now */
+    void panel.offsetHeight;                                           /* flush before retarget */
+    panel.addEventListener("transitionend", rec.settle);
+    requestAnimationFrame(function () {
+      panel.style.height = open ? rec.inner.offsetHeight + "px" : "0px";
+    });
+  }
 
-      if (reduced) {
-        panel.style.height = open ? "0px" : "auto";
-        panel.inert = open;
-        return;
-      }
+  accs.forEach(function (rec) {
+    rec.btn.addEventListener("click", function () { setPanel(rec, !isOpen(rec), true); });
+  });
 
-      panel.inert = false;                 /* clear before it becomes reachable */
-      panel.style.height = panel.getBoundingClientRect().height + "px";  /* pin where it is now */
-      void panel.offsetHeight;                                           /* flush before retarget */
-      panel.addEventListener("transitionend", settle);
-      requestAnimationFrame(function () {
-        panel.style.height = open ? "0px" : inner.offsetHeight + "px";
+  /* ---- expand all ----
+     Long-form guide behind nineteen disclosures is hostile to a screen
+     reader user and breaks Ctrl+F across the whole document. This is the
+     escape hatch, and it is a good affordance for a long read regardless. */
+  var accAll = document.getElementById("accAll");
+  if (accAll && accs.length) {
+    accAll.addEventListener("click", function () {
+      var openAll = !accs.every(isOpen);
+      accs.forEach(function (rec) { setPanel(rec, openAll, false); });
+      accAll.textContent = openAll ? "Collapse all" : "Expand all";
+    });
+    /* keep the label honest when panels are toggled individually */
+    accs.forEach(function (rec) {
+      rec.btn.addEventListener("click", function () {
+        accAll.textContent = accs.every(isOpen) ? "Collapse all" : "Expand all";
       });
     });
-  });
+  }
 
   /* ---- reveal ---- */
   var items = document.querySelectorAll(".reveal");
