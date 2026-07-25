@@ -77,10 +77,6 @@ p{margin:0 0 20px}
 .orb-a{background:radial-gradient(circle at 32% 28%,#FF8A72 0%,#FF5A4E 46%,#D93A2E 100%)}
 .orb-b{background:radial-gradient(circle at 32% 28%,#FFD2BE 0%,#FFB39A 48%,#F08F6E 100%)}
 .orb-c{background:radial-gradient(circle at 32% 28%,#A79CFF 0%,#7C6CF5 48%,#5B4AD1 100%)}
-@keyframes float{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-16px,0)}}
-.floaty{animation:float 7s ease-in-out infinite}
-.floaty.slow{animation-duration:10s}
-.floaty.fast{animation-duration:5.5s}
 
 /* ---- hero ---- */
 .hero{position:relative;padding:80px 0 84px;overflow:hidden;text-align:center}
@@ -195,9 +191,9 @@ footer{padding:56px 0 48px;border-top:1px solid var(--hair)}
 <!-- ═══════════════════ HERO ═══════════════════ -->
 <header class="hero">
   <div class="hero-orbs" aria-hidden="true">
-    <div class="orb orb-a floaty" id="p1" data-depth="0.16"></div>
-    <div class="orb orb-c floaty fast" id="p2" data-depth="0.3"></div>
-    <div class="orb orb-b floaty slow" id="p3" data-depth="0.1"></div>
+    <div class="orb orb-a" id="p1" data-depth="0.16"></div>
+    <div class="orb orb-c" id="p2" data-depth="0.3"></div>
+    <div class="orb orb-b" id="p3" data-depth="0.1"></div>
   </div>
   <div class="read hero-in">
     <p class="eyebrow">a field guide for solo builders</p>
@@ -304,7 +300,7 @@ footer{padding:56px 0 48px;border-top:1px solid var(--hair)}
 <section class="band" id="get">
   <div class="wrap">
     <div class="capture reveal">
-      <div class="capture-orbs" aria-hidden="true"><div class="orb orb-a floaty" id="k1"></div></div>
+      <div class="capture-orbs" aria-hidden="true"><div class="orb orb-a" id="k1" data-depth="0.14"></div></div>
       <div class="capture-in">
         <p class="eyebrow" style="color:var(--peach)">Keep it</p>
         <h2>Take the whole thing with you.</h2>
@@ -395,7 +391,6 @@ var FORM_ENDPOINT = ""; // <-- paste your Loops form endpoint here
     if (!ticking) { ticking = true; requestAnimationFrame(frame); }
   }, { passive: true });
   frame();
-  if (reduced) { orbs.forEach(function (o) { o.classList.remove("floaty"); }); }
 
   /* ---- capture ---- */
   var form = document.getElementById("capture");

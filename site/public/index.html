@@ -262,13 +262,6 @@ footer{padding:64px 0 52px;border-top:1px solid var(--hair);margin-top:20px}
    ============================================================ */
 .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.2,.7,.3,1), transform .7s cubic-bezier(.2,.7,.3,1)}
 .reveal.in{opacity:1;transform:none}
-@keyframes float{
-  0%,100%{transform:translate3d(0,0,0)}
-  50%{transform:translate3d(0,-16px,0)}
-}
-.floaty{animation:float 7s ease-in-out infinite}
-.floaty.slow{animation-duration:10s}
-.floaty.fast{animation-duration:5.5s}
 
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
@@ -322,10 +315,10 @@ footer{padding:64px 0 52px;border-top:1px solid var(--hair);margin-top:20px}
 <!-- ═══════════════════════ HERO ═══════════════════════ -->
 <header class="hero" id="top">
   <div class="hero-orbs" aria-hidden="true">
-    <div class="orb orb-a floaty" id="o1" data-depth="0.16"></div>
-    <div class="orb orb-c floaty fast" id="o2" data-depth="0.28"></div>
-    <div class="orb orb-glass floaty slow" id="o3" data-depth="0.4"></div>
-    <div class="orb orb-b floaty slow" id="o4" data-depth="0.1"></div>
+    <div class="orb orb-a" id="o1" data-depth="0.16"></div>
+    <div class="orb orb-c" id="o2" data-depth="0.28"></div>
+    <div class="orb orb-glass" id="o3" data-depth="0.4"></div>
+    <div class="orb orb-b" id="o4" data-depth="0.1"></div>
   </div>
 
   <div class="wrap hero-in">
@@ -401,8 +394,8 @@ footer{padding:64px 0 52px;border-top:1px solid var(--hair);margin-top:20px}
   <div class="wrap">
     <div class="capture reveal">
       <div class="capture-orbs" aria-hidden="true">
-        <div class="orb orb-a floaty" id="c1"></div>
-        <div class="orb orb-c floaty fast" id="c2"></div>
+        <div class="orb orb-a" id="c1" data-depth="0.14"></div>
+        <div class="orb orb-c" id="c2" data-depth="0.22"></div>
       </div>
       <div class="capture-in">
         <p class="eyebrow" style="color:var(--peach)">Get the PDF</p>
@@ -533,18 +526,18 @@ var FORM_ENDPOINT = ""; // <-- paste your Loops form endpoint here
   var ticking = false;
   function frame() {
     var y = window.scrollY;
-    orbs.forEach(function (o) {
-      var d = parseFloat(o.getAttribute("data-depth")) || 0.15;
-      o.style.transform = "translate3d(0," + (-y * d).toFixed(1) + "px,0)";
-    });
+    if (!reduced) {
+      orbs.forEach(function (o) {
+        var d = parseFloat(o.getAttribute("data-depth")) || 0.15;
+        o.style.transform = "translate3d(0," + (-y * d).toFixed(1) + "px,0)";
+      });
+    }
     onScrollNav();
     ticking = false;
   }
   window.addEventListener("scroll", function () {
-    if (!reduced && !ticking) { ticking = true; requestAnimationFrame(frame); }
-    else if (reduced) { onScrollNav(); }
+    if (!ticking) { ticking = true; requestAnimationFrame(frame); }
   }, { passive: true });
-  if (reduced) { orbs.forEach(function (o) { o.classList.remove("floaty"); }); }
 
   /* ---- capture form ---- */
   var form = document.getElementById("capture");
