@@ -62,6 +62,7 @@
   --shadow-lift:0 30px 70px -26px rgba(255,90,78,.42), 0 8px 22px -10px rgba(22,19,15,.10);
 
   --wrap:1120px;
+  --read:720px;
   --r:18px;
 }
 
@@ -516,16 +517,32 @@ var FORM_ENDPOINT = ""; // <-- paste your Loops form endpoint here
   /* ---- mobile menu ---- */
   var toggle = document.getElementById("navToggle");
   var links = document.getElementById("navLinks");
-  toggle.addEventListener("click", function () {
-    var open = links.classList.toggle("open");
+
+  function setMenu(open) {
+    links.classList.toggle("open", open);
     toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+  }
+  toggle.addEventListener("click", function () {
+    setMenu(!links.classList.contains("open"));
   });
   links.addEventListener("click", function (e) {
-    if (e.target.tagName === "A") {
-      links.classList.remove("open");
-      toggle.setAttribute("aria-expanded", "false");
+    /* closest("a"), not tagName: the check broke the moment a nav link
+       contained a child element and the click landed on the child */
+    if (e.target.closest && e.target.closest("a")) setMenu(false);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && links.classList.contains("open")) {
+      setMenu(false);
+      toggle.focus();
     }
   });
+  /* crossing the breakpoint with the menu open left aria-expanded true
+     on a toggle that is display:none above 860px */
+  var mqDesktop = window.matchMedia("(min-width:861px)");
+  var onBreakpoint = function (e) { if (e.matches) setMenu(false); };
+  if (mqDesktop.addEventListener) mqDesktop.addEventListener("change", onBreakpoint);
+  else if (mqDesktop.addListener) mqDesktop.addListener(onBreakpoint);
 
   /* ---- scroll reveal ---- */
   var items = document.querySelectorAll(".reveal");

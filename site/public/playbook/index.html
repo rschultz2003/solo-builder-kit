@@ -23,19 +23,34 @@
 <script src="/orbs.js" defer></script>
 
 <style>
-/* Tokens are identical to / — keep them in sync. See DESIGN.md. */
+/* ============================================================
+   TOKENS  —  Soft 3D system, coral anchored
+   ============================================================ */
 :root{
-  --paper:#FBFAF9; --paper-tint:#FFF6F4; --white:#FFFFFF;
-  --ink:#16130F; --muted:#6E6860; --hair:#EAE4DD;
-  --coral:#FF5A4E; --coral-deep:#C8341F; --peach:#FFB39A; --violet:#7C6CF5;
+  --paper:#FBFAF9;
+  --paper-tint:#FFF6F4;
+  --white:#FFFFFF;
+  --ink:#16130F;
+  --muted:#6E6860;
+  --hair:#EAE4DD;
+  --coral:#FF5A4E;
+  --coral-deep:#C8341F;
+  --peach:#FFB39A;
+  --violet:#7C6CF5;
+
   --grad-warm:linear-gradient(135deg,var(--coral) 0%,var(--peach) 100%);
   --grad-cool:linear-gradient(135deg,var(--coral) 0%,var(--violet) 100%);
+
   --display:'Sora',system-ui,sans-serif;
   --body:'Plus Jakarta Sans',system-ui,sans-serif;
   --mono:'IBM Plex Mono',ui-monospace,monospace;
+
   --shadow-soft:0 18px 50px -22px rgba(255,90,78,.30), 0 4px 14px -6px rgba(22,19,15,.06);
   --shadow-lift:0 30px 70px -26px rgba(255,90,78,.42), 0 8px 22px -10px rgba(22,19,15,.10);
-  --wrap:1120px; --read:720px; --r:18px;
+
+  --wrap:1120px;
+  --read:720px;
+  --r:18px;
 }
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth}
