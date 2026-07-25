@@ -263,13 +263,18 @@ section{position:relative}
   padding:15px 20px;border-radius:999px;
   transition:border-color .2s, background .2s;
 }
-.form input[type=email]::placeholder{color:rgba(255,255,255,.42)}
+/* .48 not higher: a high-contrast placeholder starts reading as a filled
+   value and people skip the field. ~4.87:1 on --ink. */
+.form input[type=email]::placeholder{color:rgba(255,255,255,.48)}
 .form input[type=email]:focus{border-color:var(--coral);background:rgba(255,255,255,.12)}
 /* outline:none on plain :focus (0,2,1) was beating :focus-visible (0,1,0)
    and stripping the violet keyboard ring DESIGN.md requires. Suppress it
    only for pointer focus. */
 .form input[type=email]:focus:not(:focus-visible){outline:none}
-.form-note{font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.42);margin-top:16px}
+/* .62, well past the 4.5 floor: this line tells someone what happens after
+   they hand over an email, which is where capture fields lose people. It
+   should be comfortably readable, not merely compliant. */
+.form-note{font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.62);margin-top:16px}
 .form-msg{margin-top:16px;font-size:15px;font-weight:600;min-height:22px}
 .form-msg.ok{color:var(--peach)}
 .form-msg.err{color:#FF8A7C}
