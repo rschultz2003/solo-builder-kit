@@ -6,6 +6,12 @@ A running log of the meaningful choices in this project and why. Newest at the t
 
 ---
 
+## 2026-07-25 — Expand-all belongs at the top of the document, not per part
+**Decision:** When Parts 02 onward land on `/playbook`, move the "Expand all" control to a single instance at the top of the document. Do not add one per part.
+**Why:** Both use cases it serves are document-wide, not section-wide: linear reading by a screen reader, and find-in-page. A per-part control serves neither, and multiplies a low-value affordance once per section.
+**Status:** left inside Part 01 for now, because Part 01 is the only content on the page. The control is written against however many accordions exist, so the move is a markup relocation with no logic change.
+**Also note:** with 5 accordions the control is a marginal affordance. At the full document's ~19 it is the difference between the guide being linearly readable and not. It is currently solving a problem that has not arrived yet.
+
 ## 2026-07-25 — Do not derive discrete state from a continuous measurement
 **Decision:** Where a system needs to know "is this thing in state X", store that state explicitly. Do not infer it from a continuously varying quantity.
 **Why:** Orb wall enforcement was gated on current speed, on the assumption that a slow orb had settled. It had not. When an orb's rest position scrolled off screen, the settle spring kept re-accelerating it past the threshold while the wall pushed it back, and the two ground against each other in a limit cycle that never slept. The threshold was a condition that could never be reached, because the thing being measured was being actively driven through it. Replaced with an explicit `flying` flag, set on release and cleared once on slowing.
