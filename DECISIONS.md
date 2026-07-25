@@ -6,6 +6,17 @@ A running log of the meaningful choices in this project and why. Newest at the t
 
 ---
 
+## 2026-07-25 — Do not derive discrete state from a continuous measurement
+**Decision:** Where a system needs to know "is this thing in state X", store that state explicitly. Do not infer it from a continuously varying quantity.
+**Why:** Orb wall enforcement was gated on current speed, on the assumption that a slow orb had settled. It had not. When an orb's rest position scrolled off screen, the settle spring kept re-accelerating it past the threshold while the wall pushed it back, and the two ground against each other in a limit cycle that never slept. The threshold was a condition that could never be reached, because the thing being measured was being actively driven through it. Replaced with an explicit `flying` flag, set on release and cleared once on slowing.
+**Tradeoffs:** One more piece of state to keep correct. Cheap next to a failure mode that only appears in a specific combination of throw and scroll, and that no amount of threshold tuning could have fixed.
+**Generalises:** any "is it moving / idle / finished / settled" test written as a comparison against a live value. The same shape shows up in debounce-by-velocity, scroll-end detection, and animation-complete checks.
+
+## 2026-07-25 — Not using hidden="until-found" for collapsed accordion panels
+**Decision:** Collapsed panels use `inert`, plus an explicit "Expand all" control to restore find-in-page. Not `hidden="until-found"`.
+**Why:** `hidden="until-found"` solves the find-in-page case natively — the browser reveals the panel when a match is inside it — but it is Chromium and Safari 18+ only, so Firefox would need the manual branch anyway. Carrying both paths is not worth it today.
+**Revisit when:** Firefox ships it. At that point `hidden="until-found"` replaces the inert bookkeeping and the "Expand all" control becomes a pure affordance rather than an accessibility requirement.
+
 ## 2026-07-25 — Orbs: one transform authority, in a shared file
 **Decision:** Physics lives in `site/public/orbs.js`, loaded by both pages, and is the only writer of `transform` on an orb. Render decomposes as `rendered = R(scrollY) + p`, with physics acting only on the offset `p`.
 **Why:** The original bug was two systems writing one property. Keeping scroll out of the integrator makes scrolling exact rather than something a spring chases, and makes sleep a clean test (`|p|≈0 && |v|≈0`). A shared external file is still zero-build and makes the required "both pages share identical physics code" structurally true — these two files had already drifted once, in their token blocks.
