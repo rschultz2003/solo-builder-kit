@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reuben Dorje — solo founder, building in public</title>
+<meta name="description" content="Free playbooks, kits and templates for solo founders who build with AI. Written by Reuben Dorje while shipping seven products alone.">
+<link rel="canonical" href="https://reubendorje.com/">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://reubendorje.com/">
+<meta property="og:title" content="Reuben Dorje — solo founder, building in public">
+<meta property="og:description" content="Free playbooks, kits and templates for solo founders who build with AI.">
+<meta property="og:image" content="https://reubendorje.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@reubendorje">
+<meta name="twitter:creator" content="@reubendorje">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Reuben Dorje",
+  "url": "https://reubendorje.com",
+  "jobTitle": "Solo founder",
+  "sameAs": ["https://x.com/reubendorje"],
+  "description": "Solo software founder building products with AI, and publishing free playbooks for people doing the same."
+}
+</script>
+
+<style>
+/* ============================================================
+   TOKENS  —  Soft 3D system, coral anchored
+   ============================================================ */
+:root{
+  --paper:#FBFAF9;
+  --paper-tint:#FFF6F4;
+  --white:#FFFFFF;
+  --ink:#16130F;
+  --muted:#6E6860;
+  --hair:#EAE4DD;
+  --coral:#FF5A4E;
+  --coral-deep:#C8341F;
+  --peach:#FFB39A;
+  --violet:#7C6CF5;
+
+  --grad-warm:linear-gradient(135deg,var(--coral) 0%,var(--peach) 100%);
+  --grad-cool:linear-gradient(135deg,var(--coral) 0%,var(--violet) 100%);
+
+  --display:'Sora',system-ui,sans-serif;
+  --body:'Plus Jakarta Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+
+  --shadow-soft:0 18px 50px -22px rgba(255,90,78,.30), 0 4px 14px -6px rgba(22,19,15,.06);
+  --shadow-lift:0 30px 70px -26px rgba(255,90,78,.42), 0 8px 22px -10px rgba(22,19,15,.10);
+
+  --wrap:1120px;
+  --r:18px;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--body);
+  font-size:17px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+img{max-width:100%;display:block}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--violet);outline-offset:3px;border-radius:6px}
+
+.wrap{width:100%;max-width:var(--wrap);margin:0 auto;padding:0 24px}
+.eyebrow{
+  font-family:var(--mono);font-size:11px;font-weight:500;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--coral-deep);
+  margin:0 0 18px;
+}
+h1,h2,h3{font-family:var(--display);font-weight:600;letter-spacing:-.025em;line-height:1.08;margin:0}
+h2{font-size:clamp(30px,4.4vw,50px)}
+h3{font-size:20px;letter-spacing:-.015em;line-height:1.25}
+p{margin:0 0 18px}
+.lede{font-size:clamp(17px,1.9vw,20px);color:var(--muted);max-width:56ch}
+
+/* ============================================================
+   ORBS  —  the signature: soft rendered spheres with light
+   ============================================================ */
+.orb{
+  position:absolute;border-radius:50%;pointer-events:none;
+  will-change:transform;
+}
+.orb::after{ /* specular highlight */
+  content:"";position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at 30% 24%,rgba(255,255,255,.92) 0%,rgba(255,255,255,.34) 16%,rgba(255,255,255,0) 44%);
+}
+.orb-a{background:radial-gradient(circle at 32% 28%,#FF8A72 0%,#FF5A4E 46%,#D93A2E 100%)}
+.orb-b{background:radial-gradient(circle at 32% 28%,#FFD2BE 0%,#FFB39A 48%,#F08F6E 100%)}
+.orb-c{background:radial-gradient(circle at 32% 28%,#A79CFF 0%,#7C6CF5 48%,#5B4AD1 100%)}
+.orb-glass{
+  background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.9) 0%,rgba(255,214,203,.55) 45%,rgba(255,146,128,.35) 100%);
+  backdrop-filter:blur(2px);
+}
+
+/* ============================================================
+   NAV
+   ============================================================ */
+.nav{
+  position:sticky;top:0;z-index:60;
+  backdrop-filter:saturate(180%) blur(14px);
+  background:rgba(251,250,249,.78);
+  border-bottom:1px solid transparent;
+  transition:border-color .3s ease, background .3s ease;
+}
+.nav.stuck{border-bottom-color:var(--hair);background:rgba(251,250,249,.92)}
+.nav-in{display:flex;align-items:center;gap:28px;height:70px}
+.mark{display:flex;align-items:center;gap:11px;text-decoration:none;font-family:var(--display);font-weight:600;letter-spacing:-.02em;font-size:16px}
+.mark-orb{width:22px;height:22px;border-radius:50%;background:var(--grad-warm);box-shadow:inset -3px -4px 8px rgba(160,40,25,.45), inset 3px 4px 8px rgba(255,255,255,.55)}
+.nav-links{margin-left:auto;display:flex;align-items:center;gap:26px}
+.nav-links a{font-size:14.5px;font-weight:500;text-decoration:none;color:var(--muted);transition:color .2s}
+.nav-links a:hover{color:var(--ink)}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  font-family:var(--body);font-size:15px;font-weight:600;
+  padding:13px 24px;border-radius:999px;border:0;cursor:pointer;
+  text-decoration:none;transition:transform .18s ease, box-shadow .18s ease;
+}
+.btn-primary{background:var(--coral);color:#fff;box-shadow:var(--shadow-soft)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
+.btn-ghost{background:var(--white);color:var(--ink);border:1px solid var(--hair)}
+.btn-ghost:hover{transform:translateY(-2px);border-color:var(--coral);color:var(--coral-deep)}
+.btn-sm{padding:10px 19px;font-size:14px}
+.nav-toggle{display:none}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{position:relative;padding:88px 0 96px;overflow:hidden}
+.hero-orbs{position:absolute;inset:0;pointer-events:none}
+#o1{width:300px;height:300px;top:-70px;right:-60px}
+#o2{width:150px;height:150px;top:250px;right:180px}
+#o3{width:88px;height:88px;top:70px;right:290px}
+#o4{width:190px;height:190px;bottom:-90px;left:-70px;opacity:.55}
+.hero-in{position:relative;z-index:2;max-width:760px}
+.hero h1{font-size:clamp(40px,6.6vw,74px);margin:0 0 22px}
+.hero h1 .grad{
+  background:var(--grad-cool);-webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero .lede{font-size:clamp(17px,2vw,21px);margin-bottom:34px}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:26px}
+.hero-note{font-family:var(--mono);font-size:12.5px;color:var(--muted);letter-spacing:.02em}
+
+.strip{
+  margin-top:52px;display:flex;flex-wrap:wrap;gap:10px;position:relative;z-index:2;
+}
+.chip{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--white);border:1px solid var(--hair);border-radius:999px;
+  padding:8px 15px;font-family:var(--mono);font-size:12px;color:var(--muted);
+}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--coral)}
+.dot.live{background:#2FA36B}
+.dot.soon{background:var(--peach)}
+
+/* ============================================================
+   SECTION SHELL
+   ============================================================ */
+section{position:relative}
+.band{padding:96px 0}
+.band-tint{background:var(--paper-tint)}
+.sec-head{max-width:640px;margin-bottom:52px}
+
+/* ============================================================
+   LIBRARY  —  the lead-gen engine
+   ============================================================ */
+.lib{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px}
+.card{
+  position:relative;background:var(--white);border:1px solid var(--hair);
+  border-radius:var(--r);padding:30px 28px 28px;
+  display:flex;flex-direction:column;
+  transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  overflow:hidden;
+}
+.card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lift);border-color:transparent}
+.card-orb{width:56px;height:56px;position:relative;margin-bottom:22px;border-radius:50%;flex:none}
+.card-orb::after{
+  content:"";position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at 30% 24%,rgba(255,255,255,.95) 0%,rgba(255,255,255,.3) 18%,rgba(255,255,255,0) 46%);
+}
+.card-kind{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.card p{font-size:15.5px;color:var(--muted);margin:12px 0 22px}
+.card-foot{margin-top:auto;display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.card-locked{opacity:.62}
+.tag{
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);border:1px solid var(--hair);border-radius:999px;padding:6px 12px;
+}
+
+/* ============================================================
+   CAPTURE
+   ============================================================ */
+.capture{
+  position:relative;overflow:hidden;
+  background:var(--ink);color:#fff;border-radius:28px;
+  padding:64px 48px;margin:0 auto;
+}
+.capture h2{color:#fff;max-width:16ch}
+.capture .lede{color:rgba(255,255,255,.66);margin-top:18px}
+.capture-orbs{position:absolute;inset:0;pointer-events:none;opacity:.9}
+#c1{width:260px;height:260px;top:-90px;right:-60px}
+#c2{width:120px;height:120px;bottom:-40px;right:180px}
+.capture-in{position:relative;z-index:2;max-width:560px}
+.form{display:flex;gap:10px;margin-top:30px;flex-wrap:wrap}
+.form input[type=email]{
+  flex:1 1 260px;min-width:0;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);
+  color:#fff;font-family:var(--body);font-size:16px;
+  padding:15px 20px;border-radius:999px;
+  transition:border-color .2s, background .2s;
+}
+.form input[type=email]::placeholder{color:rgba(255,255,255,.42)}
+.form input[type=email]:focus{outline:none;border-color:var(--coral);background:rgba(255,255,255,.12)}
+.form-note{font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.42);margin-top:16px}
+.form-msg{margin-top:16px;font-size:15px;font-weight:600;min-height:22px}
+.form-msg.ok{color:var(--peach)}
+.form-msg.err{color:#FF8A7C}
+
+/* ============================================================
+   SHIPPING  —  product ledger
+   ============================================================ */
+.ledger{border-top:1px solid var(--hair)}
+.row{
+  display:grid;grid-template-columns:1.1fr 2fr auto;gap:24px;align-items:center;
+  padding:26px 4px;border-bottom:1px solid var(--hair);
+  transition:padding-left .25s ease, background .25s ease;
+}
+.row:hover{padding-left:16px;background:var(--white)}
+.row-name{font-family:var(--display);font-weight:600;font-size:19px;letter-spacing:-.02em;display:flex;align-items:center;gap:11px}
+.row-what{color:var(--muted);font-size:15.5px}
+.row-state{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.row a{text-decoration:none}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer{padding:64px 0 52px;border-top:1px solid var(--hair);margin-top:20px}
+.foot-in{display:flex;flex-wrap:wrap;gap:24px;align-items:center}
+.foot-links{margin-left:auto;display:flex;gap:22px;flex-wrap:wrap}
+.foot-links a{font-size:14.5px;color:var(--muted);text-decoration:none}
+.foot-links a:hover{color:var(--coral-deep)}
+.foot-note{font-family:var(--mono);font-size:12px;color:var(--muted);width:100%;margin-top:26px}
+
+/* ============================================================
+   MOTION
+   ============================================================ */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.2,.7,.3,1), transform .7s cubic-bezier(.2,.7,.3,1)}
+.reveal.in{opacity:1;transform:none}
+@keyframes float{
+  0%,100%{transform:translate3d(0,0,0)}
+  50%{transform:translate3d(0,-16px,0)}
+}
+.floaty{animation:float 7s ease-in-out infinite}
+.floaty.slow{animation-duration:10s}
+.floaty.fast{animation-duration:5.5s}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *{animation:none!important;transition-duration:.001ms!important}
+  .reveal{opacity:1;transform:none}
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width:860px){
+  .nav-links{display:none}
+  .nav-links.open{
+    display:flex;position:absolute;top:70px;left:0;right:0;
+    flex-direction:column;align-items:flex-start;gap:6px;
+    background:var(--white);border-bottom:1px solid var(--hair);padding:18px 24px 24px;
+  }
+  .nav-links.open a{padding:8px 0;font-size:16px}
+  .nav-toggle{
+    display:inline-flex;margin-left:auto;background:none;border:0;cursor:pointer;
+    padding:10px;color:var(--ink);
+  }
+  #o1{width:200px;height:200px;top:-50px;right:-70px}
+  #o2{width:96px;height:96px;top:210px;right:20px}
+  #o3{display:none}
+  .band{padding:72px 0}
+  .capture{padding:46px 26px;border-radius:22px}
+  .row{grid-template-columns:1fr;gap:8px;padding:22px 4px}
+  .row-state{order:-1}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ NAV ═══════════════════════ -->
+<nav class="nav" id="nav">
+  <div class="wrap nav-in">
+    <a class="mark" href="#top"><span class="mark-orb"></span>reuben dorje</a>
+    <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h16M3 11h16M3 16h16"/></svg>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="#library">Free stuff</a>
+      <a href="#building">What I build</a>
+      <a href="https://x.com/reubendorje" rel="me noopener" target="_blank">X</a>
+      <a class="btn btn-primary btn-sm" href="#get">Get the playbook</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════ HERO ═══════════════════════ -->
+<header class="hero" id="top">
+  <div class="hero-orbs" aria-hidden="true">
+    <div class="orb orb-a floaty" id="o1" data-depth="0.16"></div>
+    <div class="orb orb-c floaty fast" id="o2" data-depth="0.28"></div>
+    <div class="orb orb-glass floaty slow" id="o3" data-depth="0.4"></div>
+    <div class="orb orb-b floaty slow" id="o4" data-depth="0.1"></div>
+  </div>
+
+  <div class="wrap hero-in">
+    <p class="eyebrow">Adelaide · building alone, in public</p>
+    <h1>I build software by myself,<br>and I <span class="grad">give away the map</span>.</h1>
+    <p class="lede">Seven products, no team, no funding, no permission. Everything I work out along the way gets written down and published here for free.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="#get">Get the Solo Builder&rsquo;s Playbook
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v9M4 8l4 4 4-4M2.5 14h11"/></svg>
+      </a>
+      <a class="btn btn-ghost" href="#library">See everything free</a>
+    </div>
+    <p class="hero-note">free. no upsell. read it on the web or take the pdf.</p>
+
+    <div class="strip">
+      <span class="chip"><span class="dot live"></span>Scam Scanner &middot; live on iOS</span>
+      <span class="chip"><span class="dot live"></span>Pulse &middot; live</span>
+      <span class="chip"><span class="dot soon"></span>TaskBolt &middot; shipping soon</span>
+      <span class="chip"><span class="dot soon"></span>LOKT &middot; shipping soon</span>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════ LIBRARY ═══════════════════════ -->
+<section class="band band-tint" id="library">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">The library</p>
+      <h2>Everything I know, written down.</h2>
+      <p class="lede">No email wall on the web versions. Read any of it right now. The PDF goes to your inbox so you actually keep it.</p>
+    </div>
+
+    <div class="lib">
+
+      <article class="card reveal">
+        <div class="card-orb orb-a"></div>
+        <p class="card-kind">Playbook &middot; 40 pages</p>
+        <h3>The Solo Builder&rsquo;s Playbook</h3>
+        <p>The field guide I wish someone handed me before I burned years on twenty businesses that went nowhere. Mindset, building with AI, the real toolkit, and a 30 day start plan.</p>
+        <div class="card-foot">
+          <a class="btn btn-primary btn-sm" href="/playbook">Read it free</a>
+          <a class="btn btn-ghost btn-sm" href="#get">Get the PDF</a>
+        </div>
+      </article>
+
+      <article class="card reveal">
+        <div class="card-orb orb-c"></div>
+        <p class="card-kind">Repo &middot; drop-in kit</p>
+        <h3>The Solo Builder Kit</h3>
+        <p>My actual Claude Code setup, packaged. Plan-first guardrails, four slash commands, a pre-ship audit prompt, model routing, and a decisions log. Clone it into any repo.</p>
+        <div class="card-foot">
+          <a class="btn btn-primary btn-sm" href="https://github.com/rschultz2003/solo-builder-kit" target="_blank" rel="noopener">Get it on GitHub</a>
+        </div>
+      </article>
+
+      <article class="card reveal card-locked">
+        <div class="card-orb orb-b"></div>
+        <p class="card-kind">Teardown &middot; in progress</p>
+        <h3>Ship an iOS app solo</h3>
+        <p>Everything Apple does not tell you. Review rejections, the screenshots that pass, pricing, and the exact submission checklist I now run on every build.</p>
+        <div class="card-foot">
+          <span class="tag">Next drop</span>
+          <a class="btn btn-ghost btn-sm" href="#get">Tell me when it lands</a>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ CAPTURE ═══════════════════════ -->
+<section class="band" id="get">
+  <div class="wrap">
+    <div class="capture reveal">
+      <div class="capture-orbs" aria-hidden="true">
+        <div class="orb orb-a floaty" id="c1"></div>
+        <div class="orb orb-c floaty fast" id="c2"></div>
+      </div>
+      <div class="capture-in">
+        <p class="eyebrow" style="color:var(--peach)">Get the PDF</p>
+        <h2>One email. The whole playbook.</h2>
+        <p class="lede">Send it to yourself and get every new drop the day it goes up. I write when I have something worth sending, which is not often.</p>
+
+        <form class="form" id="capture" novalidate>
+          <label for="email" class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Email address</label>
+          <input type="email" id="email" name="email" placeholder="you@email.com" required autocomplete="email">
+          <button class="btn btn-primary" type="submit" id="submitBtn">Send me the playbook</button>
+        </form>
+        <p class="form-msg" id="formMsg" role="status" aria-live="polite"></p>
+        <p class="form-note">no spam, no drip funnel, unsubscribe in one click.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ BUILDING ═══════════════════════ -->
+<section class="band band-tint" id="building">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">The ledger</p>
+      <h2>What I am actually building.</h2>
+      <p class="lede">The reason any of the above is worth reading. Real products, real state, updated as things move.</p>
+    </div>
+
+    <div class="ledger reveal">
+      <div class="row">
+        <div class="row-name"><span class="dot live"></span>Scam Scanner</div>
+        <div class="row-what">Point it at a message, link or site and it tells you if you are being scammed. iOS.</div>
+        <div class="row-state"><a href="https://tryscamscanner.com" target="_blank" rel="noopener">Live &rarr;</a></div>
+      </div>
+      <div class="row">
+        <div class="row-name"><span class="dot live"></span>Pulse</div>
+        <div class="row-what">Subscription analytics for founders who want the number without the dashboard tax.</div>
+        <div class="row-state"><a href="https://usepulseapp.dev" target="_blank" rel="noopener">Live &rarr;</a></div>
+      </div>
+      <div class="row">
+        <div class="row-name"><span class="dot soon"></span>TaskBolt</div>
+        <div class="row-what">Tasks, projects and AI agents in one place. Built for people who run everything themselves.</div>
+        <div class="row-state">Shipping soon</div>
+      </div>
+      <div class="row">
+        <div class="row-name"><span class="dot soon"></span>LOKT</div>
+        <div class="row-what">Body recomposition without the guesswork. iOS.</div>
+        <div class="row-state">Shipping soon</div>
+      </div>
+      <div class="row">
+        <div class="row-name"><span class="dot soon"></span>One Shot</div>
+        <div class="row-what">One tap a day. Time it perfectly or wait until tomorrow.</div>
+        <div class="row-state">In review</div>
+      </div>
+      <div class="row">
+        <div class="row-name"><span class="dot"></span>BARE</div>
+        <div class="row-what">Bamboo toothbrushes. Proof that not everything I build is software.</div>
+        <div class="row-state">Manufactured</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+<footer>
+  <div class="wrap foot-in">
+    <a class="mark" href="#top"><span class="mark-orb"></span>reuben dorje</a>
+    <div class="foot-links">
+      <a href="#library">Free stuff</a>
+      <a href="#building">What I build</a>
+      <a href="#get">Newsletter</a>
+      <a href="https://x.com/reubendorje" target="_blank" rel="me noopener">@reubendorje</a>
+    </div>
+    <p class="foot-note">&copy; <span id="yr">2026</span> Reuben Dorje. Built alone, in Adelaide.</p>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIG — set this before deploying
+   Loops.so: Dashboard > Forms > create a form > copy the endpoint.
+   It looks like: https://app.loops.so/api/newsletter-form/XXXXXXXX
+   ============================================================ */
+var FORM_ENDPOINT = ""; // <-- paste your Loops form endpoint here
+
+(function () {
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---- year ---- */
+  document.getElementById("yr").textContent = new Date().getFullYear();
+
+  /* ---- sticky nav border ---- */
+  var nav = document.getElementById("nav");
+  var onScrollNav = function () { nav.classList.toggle("stuck", window.scrollY > 8); };
+  onScrollNav();
+
+  /* ---- mobile menu ---- */
+  var toggle = document.getElementById("navToggle");
+  var links = document.getElementById("navLinks");
+  toggle.addEventListener("click", function () {
+    var open = links.classList.toggle("open");
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  links.addEventListener("click", function (e) {
+    if (e.target.tagName === "A") {
+      links.classList.remove("open");
+      toggle.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  /* ---- scroll reveal ---- */
+  var items = document.querySelectorAll(".reveal");
+  if (reduced || !("IntersectionObserver" in window)) {
+    items.forEach(function (el) { el.classList.add("in"); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en, i) {
+        if (en.isIntersecting) {
+          setTimeout(function () { en.target.classList.add("in"); }, i * 70);
+          io.unobserve(en.target);
+        }
+      });
+    }, { rootMargin: "0px 0px -12% 0px", threshold: 0.05 });
+    items.forEach(function (el) { io.observe(el); });
+  }
+
+  /* ---- orb parallax (rAF throttled) ---- */
+  var orbs = [].slice.call(document.querySelectorAll(".hero-orbs .orb"));
+  var ticking = false;
+  function frame() {
+    var y = window.scrollY;
+    orbs.forEach(function (o) {
+      var d = parseFloat(o.getAttribute("data-depth")) || 0.15;
+      o.style.transform = "translate3d(0," + (-y * d).toFixed(1) + "px,0)";
+    });
+    onScrollNav();
+    ticking = false;
+  }
+  window.addEventListener("scroll", function () {
+    if (!reduced && !ticking) { ticking = true; requestAnimationFrame(frame); }
+    else if (reduced) { onScrollNav(); }
+  }, { passive: true });
+  if (reduced) { orbs.forEach(function (o) { o.classList.remove("floaty"); }); }
+
+  /* ---- capture form ---- */
+  var form = document.getElementById("capture");
+  var input = document.getElementById("email");
+  var btn = document.getElementById("submitBtn");
+  var msg = document.getElementById("formMsg");
+  var valid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  function say(text, kind) {
+    msg.textContent = text;
+    msg.className = "form-msg " + (kind || "");
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var email = input.value.trim();
+
+    if (!valid.test(email)) {
+      say("That email does not look right. Check it and try again.", "err");
+      input.focus();
+      return;
+    }
+
+    if (!FORM_ENDPOINT) {
+      say("Form endpoint is not connected yet. Set FORM_ENDPOINT before going live.", "err");
+      return;
+    }
+
+    btn.disabled = true;
+    var original = btn.textContent;
+    btn.textContent = "Sending...";
+
+    var body = new URLSearchParams();
+    body.append("email", email);
+    body.append("userGroup", "playbook");
+    body.append("source", "reubendorje.com");
+
+    fetch(FORM_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: body.toString()
+    })
+      .then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (data) {
+        if (data && data.success === false) throw new Error(data.message || "failed");
+        say("Sent. Check your inbox in the next minute.", "ok");
+        form.reset();
+      })
+      .catch(function () {
+        say("That did not go through. Try again, or DM me on X and I will send it manually.", "err");
+      })
+      .finally(function () {
+        btn.disabled = false;
+        btn.textContent = original;
+      });
+  });
+})();
+</script>
+</body>
+</html>
