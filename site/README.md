@@ -11,6 +11,7 @@ Static HTML. No build step, no framework, no dependencies.
 ├── DESIGN.md            design brief — read before changing anything visual
 └── public/
     ├── index.html       home / hub
+    ├── orbs.js          orb physics — loaded by both pages, keeps them in sync
     ├── playbook/
     │   └── index.html   The Solo Builder's Playbook (web version)
     ├── og.png           1200x630 social card — home

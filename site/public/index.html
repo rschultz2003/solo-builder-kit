@@ -121,11 +121,24 @@ p{margin:0 0 18px}
   position:absolute;left:0;top:0;pointer-events:none;touch-action:none;
   -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;
 }
+/* The carrier above takes the physics transform; the skin below takes
+   the paint and the float. Separate elements, so each property still
+   has exactly one author, and the compositor can run the float without
+   waking the rAF loop, which is what lets orbs sleep while still
+   drifting. */
+.orb-skin{position:absolute;inset:0;border-radius:50%}
 /* An orb only takes the pointer once /orbs.js has confirmed the spot
    underneath is inert, so a link, button or line of text under an orb
    always wins. */
 .orb-live.hot{pointer-events:auto;cursor:grab}
 .orb-live.grabbed{pointer-events:auto;cursor:grabbing}
+@keyframes float{
+  0%,100%{transform:translate3d(0,0,0)}
+  50%{transform:translate3d(0,-16px,0)}
+}
+.floaty{animation:float 7s ease-in-out infinite}
+.floaty.slow{animation-duration:10s}
+.floaty.fast{animation-duration:5.5s}
 
 /* ============================================================
    NAV
@@ -348,9 +361,9 @@ footer{padding:64px 0 52px;border-top:1px solid var(--hair);margin-top:20px}
 <header class="hero" id="top">
   <div class="hero-orbs" aria-hidden="true">
     <div class="orb orb-a" id="o1" data-depth="0.16"></div>
-    <div class="orb orb-c" id="o2" data-depth="0.28"></div>
-    <div class="orb orb-glass" id="o3" data-depth="0.4"></div>
-    <div class="orb orb-b" id="o4" data-depth="0.1"></div>
+    <div class="orb orb-c" id="o2" data-float="fast" data-depth="0.28"></div>
+    <div class="orb orb-glass" id="o3" data-float="slow" data-depth="0.4"></div>
+    <div class="orb orb-b" id="o4" data-float="slow" data-depth="0.1"></div>
   </div>
 
   <div class="wrap hero-in">
@@ -427,7 +440,7 @@ footer{padding:64px 0 52px;border-top:1px solid var(--hair);margin-top:20px}
     <div class="capture reveal">
       <div class="capture-orbs" aria-hidden="true">
         <div class="orb orb-a" id="c1" data-depth="0.14"></div>
-        <div class="orb orb-c" id="c2" data-depth="0.22"></div>
+        <div class="orb orb-c" id="c2" data-float="fast" data-depth="0.22"></div>
       </div>
       <div class="capture-in">
         <p class="eyebrow" style="color:var(--peach)">Get the PDF</p>

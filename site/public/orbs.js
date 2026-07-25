@@ -34,7 +34,10 @@
   var running = false;
   var dirty = true;          /* transforms need rewriting (scroll/resize) */
   var lastT = 0;
-  var dragging = 0;          /* how many orbs are currently held */
+  function anyOrbHeld() {
+    for (var i = 0; i < orbs.length; i++) if (orbs[i].held) return true;
+    return false;
+  }
 
   var DT_MAX = 0.032;        /* clamp so a backgrounded tab cannot teleport orbs */
 
@@ -68,6 +71,12 @@
   var CALM_V = 70;           /* px/s */
   var CALM_RATE = 6;         /* per second */
 
+  /* float keyframe amplitude. The float lives on the skin, so the skin
+     sits 0..FLOAT_MAX above the carrier the physics clamps. The top
+     bound is inset by it so the sphere you can see never leaves the
+     screen; the other three need no inset, since float only ever lifts. */
+  var FLOAT_MAX = 16;
+
   /* ---- document-space position, immune to ancestor transforms ----
      .capture sits inside a .reveal that animates translateY(22px) -> none,
      so getBoundingClientRect would capture a pre-reveal position and bake
@@ -86,16 +95,30 @@
 
     for (var i = 0; i < anchors.length; i++) {
       var a = anchors[i];
+
+      /* Two elements, deliberately. The carrier takes the physics
+         transform; the skin carries the paint and the float keyframes.
+         Float has to survive as an input (Decision 1, and DESIGN.md
+         names it in the signature), but a float term inside the composed
+         transform would mean an orb is never still, so the rAF loop
+         could never sleep. Splitting them keeps one authority per
+         property per element: the compositor runs the float on the skin
+         without waking the loop, and the loop owns the carrier alone. */
       var el = document.createElement("div");
+      el.className = "orb-live";
+      var skin = document.createElement("div");
       /* carry the visual classes (orb-a / orb-b / orb-c / orb-glass) across;
          geometry and opacity live on the anchor's #id rules, so copy the
          computed values onto the live orb instead of the selector */
-      el.className = a.className + " orb-live";
+      skin.className = a.className + " orb-skin floaty" +
+                       (a.getAttribute("data-float") ? " " + a.getAttribute("data-float") : "");
+      el.appendChild(skin);
       a.classList.add("orb-anchor");
 
       orbs.push({
         anchor: a,
         el: el,
+        skin: skin,
         depth: parseFloat(a.getAttribute("data-depth")) || 0.15,
         ax: 0, ay: 0, w: 0, h: 0, rad: 0,
         px: 0, py: 0,          /* physics offset */
@@ -123,6 +146,10 @@
       var w = o.anchor.offsetWidth, h = o.anchor.offsetHeight;
       o.live = w > 0 && h > 0;               /* #o3 is display:none <=860px */
       o.el.style.display = o.live ? "" : "none";
+      /* a held orb that just stopped being laid out (resized past a
+         breakpoint mid-drag) would otherwise stay held forever, and the
+         loop skips non-live orbs so it could never release itself */
+      if (!o.live && o.held) release(o, true);
       if (!o.live) continue;
       var p = docPos(o.anchor);
       o.ax = p.x; o.ay = p.y;
@@ -171,7 +198,7 @@
       var x = restX(o) + o.px, y = restY(o) + o.py;
       if (x < 0)          { o.px -= x;               o.vx = -o.vx * BOUNCE; o.vy *= WALL_FRICTION; }
       else if (x + o.w > vw) { o.px -= x + o.w - vw; o.vx = -o.vx * BOUNCE; o.vy *= WALL_FRICTION; }
-      if (y < 0)          { o.py -= y;               o.vy = -o.vy * BOUNCE; o.vx *= WALL_FRICTION; }
+      if (y < FLOAT_MAX)  { o.py += FLOAT_MAX - y;   o.vy = -o.vy * BOUNCE; o.vx *= WALL_FRICTION; }
       else if (y + o.h > vh) { o.py -= y + o.h - vh; o.vy = -o.vy * BOUNCE; o.vx *= WALL_FRICTION; }
     }
 
@@ -197,10 +224,12 @@
 
     scrollY = window.scrollY;
     var busy = false;
+    var anyHeld = false;
 
     for (var i = 0; i < orbs.length; i++) {
       var o = orbs[i];
       if (!o.live) continue;
+      if (o.held) anyHeld = true;
       if (!o.asleep && !o.held && dt > 0) step(o, dt);
       if (!o.asleep) busy = true;
       if (!o.asleep || dirty) draw(o);
@@ -208,7 +237,9 @@
 
     dirty = false;
 
-    if (!busy && !dragging) { running = false; lastT = 0; return; }
+    /* derived from the orbs themselves, never a hand-kept counter: a
+       single missed release would otherwise pin the loop on forever */
+    if (!busy && !anyHeld) { running = false; lastT = 0; return; }
     requestAnimationFrame(tick);
   }
 
@@ -258,7 +289,6 @@
     if (o.held || !o.live) return;
     o.held = true;
     o.pid = e.pointerId;
-    dragging++;
     o.asleep = false;
     o.vx = 0; o.vy = 0;                    /* grabbing kills existing motion */
 
@@ -284,21 +314,25 @@
     wake();
   }
 
-  /* cancelled === true for pointercancel: a system gesture took the
-     pointer away, so release cleanly rather than leaving the orb stuck
-     to a pointer that no longer exists. */
-  function onUp(o, e, cancelled) {
-    if (!o.held || e.pointerId !== o.pid) return;
+  /* cancelled === true for pointercancel, or for a forced release: a
+     system gesture took the pointer away, so release cleanly rather than
+     leaving the orb stuck to a pointer that no longer exists. */
+  function release(o, cancelled) {
+    var pid = o.pid;
     o.held = false;
     o.pid = -1;
-    dragging--;
     o.el.classList.remove("grabbed");
     o.el.classList.remove("hot");
-    try { o.el.releasePointerCapture(e.pointerId); } catch (err) {}
+    if (pid >= 0) { try { o.el.releasePointerCapture(pid); } catch (err) {} }
 
     if (cancelled || !throwVelocity(o, performance.now())) { o.vx = 0; o.vy = 0; }
     o.samples.length = 0;
     wake();
+  }
+
+  function onUp(o, e, cancelled) {
+    if (!o.held || e.pointerId !== o.pid) return;
+    release(o, cancelled);
   }
 
   function bind(o) {
@@ -353,9 +387,18 @@
     for (var i = orbs.length - 1; i >= 0; i--) {
       var o = orbs[i];
       if (!o.live) continue;
+      /* cheap reject first. The carrier does not know about the float
+         bob, so widen by the keyframe amplitude before paying for a
+         layout read; most pointer positions never get past this. */
       var dx = x - (restX(o) + o.px + o.rad);
       var dy = y - (restY(o) + o.py + o.rad);
-      if (dx * dx + dy * dy <= o.rad * o.rad) return o;
+      var slack = o.rad + FLOAT_MAX;
+      if (dx * dx + dy * dy > slack * slack) continue;
+      /* exact: the skin is where the orb is actually painted */
+      var r = o.skin.getBoundingClientRect();
+      var ex = x - (r.left + r.width / 2);
+      var ey = y - (r.top + r.height / 2);
+      if (ex * ex + ey * ey <= o.rad * o.rad) return o;
     }
     return null;
   }
@@ -375,7 +418,7 @@
   if (window.matchMedia("(hover: hover)").matches) {
     var hot = null;
     document.addEventListener("pointermove", function (e) {
-      if (dragging) return;
+      if (anyOrbHeld()) return;
       var o = grabbable(e.clientX, e.clientY);
       if (o === hot) return;
       if (hot) hot.el.classList.remove("hot");
@@ -402,4 +445,9 @@
   });
 
   build();
+
+  /* Anchors deep in the page sit below a lot of text, so their document
+     position shifts when the webfonts swap in. build() runs on defer,
+     before that happens. */
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
 })();

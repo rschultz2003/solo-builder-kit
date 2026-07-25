@@ -109,11 +109,24 @@ p{margin:0 0 20px}
   position:absolute;left:0;top:0;pointer-events:none;touch-action:none;
   -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;
 }
+/* The carrier above takes the physics transform; the skin below takes
+   the paint and the float. Separate elements, so each property still
+   has exactly one author, and the compositor can run the float without
+   waking the rAF loop, which is what lets orbs sleep while still
+   drifting. */
+.orb-skin{position:absolute;inset:0;border-radius:50%}
 /* An orb only takes the pointer once /orbs.js has confirmed the spot
    underneath is inert, so a link, button or line of text under an orb
    always wins. */
 .orb-live.hot{pointer-events:auto;cursor:grab}
 .orb-live.grabbed{pointer-events:auto;cursor:grabbing}
+@keyframes float{
+  0%,100%{transform:translate3d(0,0,0)}
+  50%{transform:translate3d(0,-16px,0)}
+}
+.floaty{animation:float 7s ease-in-out infinite}
+.floaty.slow{animation-duration:10s}
+.floaty.fast{animation-duration:5.5s}
 
 /* ---- hero ---- */
 .hero{position:relative;padding:80px 0 84px;overflow:hidden;text-align:center}
@@ -233,8 +246,8 @@ footer{padding:56px 0 48px;border-top:1px solid var(--hair)}
 <header class="hero">
   <div class="hero-orbs" aria-hidden="true">
     <div class="orb orb-a" id="p1" data-depth="0.16"></div>
-    <div class="orb orb-c" id="p2" data-depth="0.3"></div>
-    <div class="orb orb-b" id="p3" data-depth="0.1"></div>
+    <div class="orb orb-c" id="p2" data-float="fast" data-depth="0.3"></div>
+    <div class="orb orb-b" id="p3" data-float="slow" data-depth="0.1"></div>
   </div>
   <div class="read hero-in">
     <p class="eyebrow">a field guide for solo builders</p>
