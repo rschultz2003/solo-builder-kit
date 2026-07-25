@@ -165,7 +165,9 @@ p{margin:0 0 18px}
   padding:13px 24px;border-radius:999px;border:0;cursor:pointer;
   text-decoration:none;transition:transform .18s ease, box-shadow .18s ease;
 }
-.btn-primary{background:var(--coral);color:#fff;box-shadow:var(--shadow-soft)}
+/* --coral-deep, not --coral: white on --coral is 3.08:1 and fails AA for
+   button text at these sizes. --coral-deep takes it to 5.29:1. */
+.btn-primary{background:var(--coral-deep);color:#fff;box-shadow:var(--shadow-soft)}
 .btn-primary:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
 .btn-ghost{background:var(--white);color:var(--ink);border:1px solid var(--hair)}
 .btn-ghost:hover{transform:translateY(-2px);border-color:var(--coral);color:var(--coral-deep)}
@@ -439,8 +441,8 @@ footer{padding:64px 0 52px;border-top:1px solid var(--hair);margin-top:20px}
   <div class="wrap">
     <div class="capture reveal">
       <div class="capture-orbs" aria-hidden="true">
-        <div class="orb orb-a" id="c1" data-depth="0.14"></div>
-        <div class="orb orb-c" id="c2" data-float="fast" data-depth="0.22"></div>
+        <div class="orb orb-a floaty" id="c1"></div>
+        <div class="orb orb-c floaty fast" id="c2"></div>
       </div>
       <div class="capture-in">
         <p class="eyebrow" style="color:var(--peach)">Get the PDF</p>

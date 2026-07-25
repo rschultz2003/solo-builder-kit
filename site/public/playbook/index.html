@@ -86,7 +86,9 @@ p{margin:0 0 20px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;font-family:var(--body);
   font-size:15px;font-weight:600;padding:13px 24px;border-radius:999px;border:0;cursor:pointer;
   text-decoration:none;transition:transform .18s ease, box-shadow .18s ease}
-.btn-primary{background:var(--coral);color:#fff;box-shadow:var(--shadow-soft)}
+/* --coral-deep, not --coral: white on --coral is 3.08:1 and fails AA for
+   button text at these sizes. --coral-deep takes it to 5.29:1. */
+.btn-primary{background:var(--coral-deep);color:#fff;box-shadow:var(--shadow-soft)}
 .btn-primary:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
 .btn-ghost{background:var(--white);color:var(--ink);border:1px solid var(--hair)}
 .btn-ghost:hover{transform:translateY(-2px);border-color:var(--coral);color:var(--coral-deep)}
@@ -354,7 +356,7 @@ footer{padding:56px 0 48px;border-top:1px solid var(--hair)}
 <section class="band" id="get">
   <div class="wrap">
     <div class="capture reveal">
-      <div class="capture-orbs" aria-hidden="true"><div class="orb orb-a" id="k1" data-depth="0.14"></div></div>
+      <div class="capture-orbs" aria-hidden="true"><div class="orb orb-a floaty" id="k1"></div></div>
       <div class="capture-in">
         <p class="eyebrow" style="color:var(--peach)">Keep it</p>
         <h2>Take the whole thing with you.</h2>

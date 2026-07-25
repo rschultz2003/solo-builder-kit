@@ -24,8 +24,19 @@
 
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-  var anchors = [].slice.call(document.querySelectorAll(".orb"));
+  /* Hero orbs only. The capture-panel orbs stay authored in place, where
+     .capture's own overflow:hidden clips them to the panel exactly as
+     before — they were never part of the parallax and have no business
+     flying around the page. */
+  var anchors = [].slice.call(document.querySelectorAll(".hero-orbs .orb"));
   if (!anchors.length) return;
+
+  /* The playfield is the first section, not the viewport. Orbs must not
+     travel down into the content below it: as the hero scrolls away the
+     floor rises with it, and once the hero is gone the orbs are gone. */
+  var hero = document.querySelector(".hero");
+  var heroBottomDoc = Infinity;
+  var floorY = 0;            /* hero bottom in screen coords, this frame */
 
   var orbs = [];
   var layer = null;
@@ -125,6 +136,7 @@
         vx: 0, vy: 0,          /* px per second */
         live: false,           /* anchor is laid out (not display:none) */
         asleep: true,
+        flying: false,         /* carrying throw energy; only then do walls apply */
         held: false,
         pid: -1,               /* pointerId of the holding pointer */
         gx: 0, gy: 0,          /* grab offset, so the orb does not snap to the cursor */
@@ -141,6 +153,8 @@
   function measure() {
     vw = document.documentElement.clientWidth;
     vh = document.documentElement.clientHeight;
+    heroBottomDoc = hero ? docPos(hero).y + hero.offsetHeight : Infinity;
+    floorY = Math.max(0, Math.min(vh, heroBottomDoc - window.scrollY));
     for (var i = 0; i < orbs.length; i++) {
       var o = orbs[i];
       var w = o.anchor.offsetWidth, h = o.anchor.offsetHeight;
@@ -194,12 +208,29 @@
     o.py += o.vy * dt;
 
     var speed = Math.sqrt(o.vx * o.vx + o.vy * o.vy);
-    if (speed > FLIGHT_V) {
+
+    /* Walls apply only while the orb is still carrying throw energy, and
+       that latch clears for good the first time it slows down. Gating on
+       speed alone is not enough: if the rest position has scrolled off
+       the top, the spring keeps re-accelerating the orb past any speed
+       threshold, the wall keeps pushing it back, and the two grind
+       against each other in a limit cycle that never sleeps. Once the
+       throw is spent the spring is left alone to take the orb home, even
+       when home is off screen. */
+    if (o.flying && speed < FLIGHT_V) o.flying = false;
+
+    if (o.flying) {
       var x = restX(o) + o.px, y = restY(o) + o.py;
       if (x < 0)          { o.px -= x;               o.vx = -o.vx * BOUNCE; o.vy *= WALL_FRICTION; }
       else if (x + o.w > vw) { o.px -= x + o.w - vw; o.vx = -o.vx * BOUNCE; o.vy *= WALL_FRICTION; }
+      /* the floor is the hero's bottom edge, not the viewport's, so a
+         thrown orb bounces back up instead of sailing into the content
+         below. Skipped once the hero is too short to hold the orb,
+         which is what lets it leave cleanly as the section scrolls off. */
       if (y < FLOAT_MAX)  { o.py += FLOAT_MAX - y;   o.vy = -o.vy * BOUNCE; o.vx *= WALL_FRICTION; }
-      else if (y + o.h > vh) { o.py -= y + o.h - vh; o.vy = -o.vy * BOUNCE; o.vx *= WALL_FRICTION; }
+      else if (floorY > o.h && y + o.h > floorY) {
+        o.py -= y + o.h - floorY; o.vy = -o.vy * BOUNCE; o.vx *= WALL_FRICTION;
+      }
     }
 
     if (speed < CALM_V && Math.abs(o.px) < CALM_P && Math.abs(o.py) < CALM_P) {
@@ -223,6 +254,15 @@
     lastT = now;
 
     scrollY = window.scrollY;
+
+    /* clip the layer to the first section, so an orb is never painted
+       over the content below it — the same containment .hero's
+       overflow:hidden used to give, but without re-clipping the sides */
+    floorY = heroBottomDoc - scrollY;
+    if (floorY > vh) floorY = vh;
+    if (floorY < 0) floorY = 0;
+    layer.style.clipPath = "inset(0 0 " + (vh - floorY) + "px 0)";
+
     var busy = false;
     var anyHeld = false;
 
@@ -308,8 +348,14 @@
 
   function onMove(o, e) {
     if (!o.held || e.pointerId !== o.pid) return;
-    o.px = e.clientX - o.gx - restX(o);
-    o.py = e.clientY - o.gy - restY(o);
+    /* keep the dragged orb inside the playfield, or it would disappear
+       under the clip while still dutifully following the pointer */
+    var x = e.clientX - o.gx, y = e.clientY - o.gy;
+    var maxX = vw - o.w, maxY = floorY - o.h;
+    if (x < 0) x = 0; else if (x > maxX) x = maxX;
+    if (y < FLOAT_MAX) y = FLOAT_MAX; else if (maxY > FLOAT_MAX && y > maxY) y = maxY;
+    o.px = x - restX(o);
+    o.py = y - restY(o);
     pushSample(o, e.clientX, e.clientY, performance.now());
     wake();
   }
@@ -326,6 +372,7 @@
     if (pid >= 0) { try { o.el.releasePointerCapture(pid); } catch (err) {} }
 
     if (cancelled || !throwVelocity(o, performance.now())) { o.vx = 0; o.vy = 0; }
+    o.flying = Math.sqrt(o.vx * o.vx + o.vy * o.vy) > FLIGHT_V;
     o.samples.length = 0;
     wake();
   }
