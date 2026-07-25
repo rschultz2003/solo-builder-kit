@@ -160,7 +160,11 @@ p{margin:0 0 20px}
   border:1px solid rgba(255,255,255,.18);color:#fff;font-family:var(--body);font-size:16px;
   padding:15px 20px;border-radius:999px}
 .form input[type=email]::placeholder{color:rgba(255,255,255,.42)}
-.form input[type=email]:focus{outline:none;border-color:var(--coral);background:rgba(255,255,255,.12)}
+.form input[type=email]:focus{border-color:var(--coral);background:rgba(255,255,255,.12)}
+/* outline:none on plain :focus (0,2,1) was beating :focus-visible (0,1,0)
+   and stripping the violet keyboard ring DESIGN.md requires. Suppress it
+   only for pointer focus. */
+.form input[type=email]:focus:not(:focus-visible){outline:none}
 .form-msg{margin-top:16px;font-size:15px;font-weight:600;min-height:22px}
 .form-msg.ok{color:var(--peach)} .form-msg.err{color:#FF8A7C}
 .form-note{font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.42);margin-top:14px}

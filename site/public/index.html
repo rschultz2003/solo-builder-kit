@@ -137,8 +137,10 @@ p{margin:0 0 18px}
 .mark{display:flex;align-items:center;gap:11px;text-decoration:none;font-family:var(--display);font-weight:600;letter-spacing:-.02em;font-size:16px}
 .mark-orb{width:22px;height:22px;border-radius:50%;background:var(--grad-warm);box-shadow:inset -3px -4px 8px rgba(160,40,25,.45), inset 3px 4px 8px rgba(255,255,255,.55)}
 .nav-links{margin-left:auto;display:flex;align-items:center;gap:26px}
-.nav-links a{font-size:14.5px;font-weight:500;text-decoration:none;color:var(--muted);transition:color .2s}
-.nav-links a:hover{color:var(--ink)}
+/* :not(.btn) — without it this rule outranks .btn-primary (0,1,1 beats 0,1,0)
+   and renders the nav CTA as muted grey on coral at 1.79:1. */
+.nav-links a:not(.btn){font-size:14.5px;font-weight:500;text-decoration:none;color:var(--muted);transition:color .2s}
+.nav-links a:not(.btn):hover{color:var(--ink)}
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:9px;
   font-family:var(--body);font-size:15px;font-weight:600;
@@ -210,7 +212,10 @@ section{position:relative}
 .card-kind{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
 .card p{font-size:15.5px;color:var(--muted);margin:12px 0 22px}
 .card-foot{margin-top:auto;display:flex;flex-wrap:wrap;align-items:center;gap:10px}
-.card-locked{opacity:.62}
+/* .lib .card.card-locked, not .card-locked: at (0,1,0) this lost to
+   .reveal.in{opacity:1} (0,2,0) the moment the card revealed, so the
+   locked card never actually dimmed. */
+.lib .card.card-locked{opacity:.62}
 .tag{
   font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
   color:var(--muted);border:1px solid var(--hair);border-radius:999px;padding:6px 12px;
@@ -239,7 +244,11 @@ section{position:relative}
   transition:border-color .2s, background .2s;
 }
 .form input[type=email]::placeholder{color:rgba(255,255,255,.42)}
-.form input[type=email]:focus{outline:none;border-color:var(--coral);background:rgba(255,255,255,.12)}
+.form input[type=email]:focus{border-color:var(--coral);background:rgba(255,255,255,.12)}
+/* outline:none on plain :focus (0,2,1) was beating :focus-visible (0,1,0)
+   and stripping the violet keyboard ring DESIGN.md requires. Suppress it
+   only for pointer focus. */
+.form input[type=email]:focus:not(:focus-visible){outline:none}
 .form-note{font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.42);margin-top:16px}
 .form-msg{margin-top:16px;font-size:15px;font-weight:600;min-height:22px}
 .form-msg.ok{color:var(--peach)}
