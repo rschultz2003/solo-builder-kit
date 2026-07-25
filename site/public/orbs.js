@@ -34,6 +34,7 @@
   var running = false;
   var dirty = true;          /* transforms need rewriting (scroll/resize) */
   var lastT = 0;
+  var dragging = 0;          /* how many orbs are currently held */
 
   var DT_MAX = 0.032;        /* clamp so a backgrounded tab cannot teleport orbs */
 
@@ -70,8 +71,12 @@
         px: 0, py: 0,          /* physics offset */
         vx: 0, vy: 0,          /* px per second */
         live: false,           /* anchor is laid out (not display:none) */
-        asleep: true
+        asleep: true,
+        held: false,
+        pid: -1,               /* pointerId of the holding pointer */
+        gx: 0, gy: 0           /* grab offset, so the orb does not snap to the cursor */
       });
+      bind(orbs[orbs.length - 1]);
       layer.appendChild(el);
     }
     document.body.appendChild(layer);
@@ -125,7 +130,7 @@
 
     dirty = false;
 
-    if (!busy) { running = false; lastT = 0; return; }
+    if (!busy && !dragging) { running = false; lastT = 0; return; }
     requestAnimationFrame(tick);
   }
 
@@ -134,6 +139,58 @@
     running = true;
     lastT = 0;
     requestAnimationFrame(tick);
+  }
+
+  /* ---- drag ----------------------------------------------------
+     Pointer Events only: one code path for mouse, touch and pen.
+     touch-action:none on .orb-live stops a drag from scrolling the
+     page; touches anywhere else scroll normally. */
+
+  function onDown(o, e) {
+    if (o.held || !o.live) return;
+    o.held = true;
+    o.pid = e.pointerId;
+    dragging++;
+    o.asleep = false;
+    o.vx = 0; o.vy = 0;                    /* grabbing kills existing motion */
+
+    /* preserve where in the orb the pointer landed */
+    o.gx = e.clientX - (restX(o) + o.px);
+    o.gy = e.clientY - (restY(o) + o.py);
+
+    o.el.classList.add("grabbed");
+    try { o.el.setPointerCapture(e.pointerId); } catch (err) {}
+    e.preventDefault();                    /* no text-selection drag */
+    wake();
+  }
+
+  function onMove(o, e) {
+    if (!o.held || e.pointerId !== o.pid) return;
+    o.px = e.clientX - o.gx - restX(o);
+    o.py = e.clientY - o.gy - restY(o);
+    wake();
+  }
+
+  /* cancelled === true for pointercancel: a system gesture took the
+     pointer away, so release cleanly rather than leaving the orb stuck
+     to a pointer that no longer exists. */
+  function onUp(o, e, cancelled) {
+    if (!o.held || e.pointerId !== o.pid) return;
+    o.held = false;
+    o.pid = -1;
+    dragging--;
+    o.el.classList.remove("grabbed");
+    try { o.el.releasePointerCapture(e.pointerId); } catch (err) {}
+    if (cancelled) { o.vx = 0; o.vy = 0; }
+    wake();
+  }
+
+  function bind(o) {
+    var el = o.el;
+    el.addEventListener("pointerdown", function (e) { onDown(o, e); });
+    el.addEventListener("pointermove", function (e) { onMove(o, e); }, { passive: true });
+    el.addEventListener("pointerup", function (e) { onUp(o, e, false); }, { passive: true });
+    el.addEventListener("pointercancel", function (e) { onUp(o, e, true); }, { passive: true });
   }
 
   /* ---- inputs ---- */
