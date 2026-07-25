@@ -54,7 +54,11 @@ p{margin:0 0 20px}
 .lede{font-size:clamp(17px,2vw,20.5px);color:var(--muted)}
 
 /* ---- progress + nav ---- */
-.progress{position:fixed;top:0;left:0;height:3px;width:0%;background:var(--grad-cool);z-index:80;transition:width .1s linear}
+/* scaleX, not width: width animates layout every scroll frame. The .1s
+   transition is gone too, because it interpolated toward a target the
+   rAF loop was already rewriting each frame. */
+.progress{position:fixed;top:0;left:0;height:3px;width:100%;background:var(--grad-cool);z-index:80;
+  transform:scaleX(0);transform-origin:0 50%}
 .nav{position:sticky;top:0;z-index:60;backdrop-filter:saturate(180%) blur(14px);
   background:rgba(251,250,249,.82);border-bottom:1px solid transparent;transition:border-color .3s}
 .nav.stuck{border-bottom-color:var(--hair)}
@@ -355,24 +359,52 @@ var FORM_ENDPOINT = ""; // <-- paste your Loops form endpoint here
   var nav = document.getElementById("nav");
   var bar = document.getElementById("progress");
 
-  /* ---- accordions (height-animated, keyboard + a11y correct) ---- */
+  /* ---- accordions (height-animated, keyboard + a11y correct) ----
+     The previous version attached a one-shot transitionend listener on
+     open that latched height to "auto". Closing mid-open left that
+     listener attached, so the CLOSING transition fired it and snapped
+     the panel fully open while aria-expanded said "false". Rapid
+     clicking desynced the two permanently.
+
+     Now: any pending latch is dropped at the start of every toggle, the
+     handler filters on target and propertyName, and it re-checks
+     aria-expanded before latching, so a stale event can never open a
+     panel that is meant to be closed. */
   [].forEach.call(document.querySelectorAll(".acc-btn"), function (btn) {
     var panel = btn.nextElementSibling;
     var inner = panel.firstElementChild;
+
+    /* collapsed content stays out of the a11y tree, not just visually clipped */
+    if (btn.getAttribute("aria-expanded") !== "true") panel.style.visibility = "hidden";
+
+    function settle(e) {
+      if (e && (e.target !== panel || e.propertyName !== "height")) return;
+      panel.removeEventListener("transitionend", settle);
+      if (btn.getAttribute("aria-expanded") === "true") {
+        panel.style.height = "auto";       /* so it reflows with the viewport */
+      } else {
+        panel.style.visibility = "hidden";
+      }
+    }
+
     btn.addEventListener("click", function () {
       var open = btn.getAttribute("aria-expanded") === "true";
       btn.setAttribute("aria-expanded", open ? "false" : "true");
-      if (reduced) { panel.style.height = open ? "0px" : "auto"; return; }
-      if (open) {
-        panel.style.height = inner.offsetHeight + "px";
-        requestAnimationFrame(function () { panel.style.height = "0px"; });
-      } else {
-        panel.style.height = inner.offsetHeight + "px";
-        panel.addEventListener("transitionend", function once () {
-          panel.style.height = "auto";
-          panel.removeEventListener("transitionend", once);
-        });
+      panel.removeEventListener("transitionend", settle);
+
+      if (reduced) {
+        panel.style.height = open ? "0px" : "auto";
+        panel.style.visibility = open ? "hidden" : "";
+        return;
       }
+
+      panel.style.visibility = "";
+      panel.style.height = panel.getBoundingClientRect().height + "px";  /* pin where it is now */
+      void panel.offsetHeight;                                           /* flush before retarget */
+      panel.addEventListener("transitionend", settle);
+      requestAnimationFrame(function () {
+        panel.style.height = open ? "0px" : inner.offsetHeight + "px";
+      });
     });
   });
 
@@ -392,17 +424,38 @@ var FORM_ENDPOINT = ""; // <-- paste your Loops form endpoint here
   /* ---- scroll: progress + nav.
          Orb transforms are owned exclusively by /orbs.js. ---- */
   var ticking = false;
+  var maxScroll = 0;
+
+  /* documentElement.scrollHeight was read inside the rAF frame, forcing
+     a layout on every scroll frame. It is cached here instead, and
+     refreshed on the two things that actually change it: viewport size
+     and content height (an accordion opening). */
+  function remeasure() {
+    maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    if (!ticking) { ticking = true; requestAnimationFrame(frame); }
+  }
+
   function frame() {
     var y = window.scrollY;
-    var h = document.documentElement.scrollHeight - window.innerHeight;
-    bar.style.width = (h > 0 ? (y / h) * 100 : 0) + "%";
+    var p = maxScroll > 0 ? y / maxScroll : 0;
+    bar.style.transform = "scaleX(" + (p < 0 ? 0 : p > 1 ? 1 : p) + ")";
     nav.classList.toggle("stuck", y > 8);
     ticking = false;
   }
   window.addEventListener("scroll", function () {
     if (!ticking) { ticking = true; requestAnimationFrame(frame); }
   }, { passive: true });
-  frame();
+
+  var resizeTimer = 0;
+  window.addEventListener("resize", function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(remeasure, 120);
+  }, { passive: true });
+
+  if ("ResizeObserver" in window) {
+    new ResizeObserver(remeasure).observe(document.documentElement);
+  }
+  remeasure();
 
   /* ---- capture ---- */
   var form = document.getElementById("capture");
