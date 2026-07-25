@@ -38,6 +38,10 @@
 
   var DT_MAX = 0.032;        /* clamp so a backgrounded tab cannot teleport orbs */
 
+  var SAMPLE_MS = 100;       /* velocity is measured over this trailing window */
+  var SAMPLE_MAX = 5;
+  var THROW_MAX = 4200;      /* px/s, guards against absurd flick velocities */
+
   /* ---- document-space position, immune to ancestor transforms ----
      .capture sits inside a .reveal that animates translateY(22px) -> none,
      so getBoundingClientRect would capture a pre-reveal position and bake
@@ -74,7 +78,8 @@
         asleep: true,
         held: false,
         pid: -1,               /* pointerId of the holding pointer */
-        gx: 0, gy: 0           /* grab offset, so the orb does not snap to the cursor */
+        gx: 0, gy: 0,          /* grab offset, so the orb does not snap to the cursor */
+        samples: []            /* trailing pointer samples, for throw velocity */
       });
       bind(orbs[orbs.length - 1]);
       layer.appendChild(el);
@@ -146,6 +151,36 @@
      touch-action:none on .orb-live stops a drag from scrolling the
      page; touches anywhere else scroll normally. */
 
+  /* ---- windowed velocity sampling ----
+     Throw speed comes from a short trailing window, not the last frame
+     delta. Samples older than SAMPLE_MS are dropped, including at the
+     moment of release. That is what makes "drag fast, hold still, let
+     go" drop the orb: holding still produces no new pointermove events,
+     so by release every surviving sample has aged out and there is
+     nothing left to derive a velocity from. */
+
+  function pushSample(o, x, y, t) {
+    var s = o.samples;
+    s.push(x, y, t);                       /* flat triples, no per-move object churn */
+    while (s.length > SAMPLE_MAX * 3) s.splice(0, 3);
+    while (s.length && t - s[2] > SAMPLE_MS) s.splice(0, 3);
+  }
+
+  function throwVelocity(o, t) {
+    var s = o.samples;
+    while (s.length && t - s[2] > SAMPLE_MS) s.splice(0, 3);
+    if (s.length < 6) return false;        /* need two live samples */
+    var n = s.length;
+    var dt = (s[n - 1] - s[2]) / 1000;
+    if (dt <= 0) return false;
+    var vx = (s[n - 3] - s[0]) / dt;
+    var vy = (s[n - 2] - s[1]) / dt;
+    var sp = Math.sqrt(vx * vx + vy * vy);
+    if (sp > THROW_MAX) { vx = vx / sp * THROW_MAX; vy = vy / sp * THROW_MAX; }
+    o.vx = vx; o.vy = vy;
+    return true;
+  }
+
   function onDown(o, e) {
     if (o.held || !o.live) return;
     o.held = true;
@@ -158,6 +193,9 @@
     o.gx = e.clientX - (restX(o) + o.px);
     o.gy = e.clientY - (restY(o) + o.py);
 
+    o.samples.length = 0;
+    pushSample(o, e.clientX, e.clientY, performance.now());
+
     o.el.classList.add("grabbed");
     try { o.el.setPointerCapture(e.pointerId); } catch (err) {}
     e.preventDefault();                    /* no text-selection drag */
@@ -168,6 +206,7 @@
     if (!o.held || e.pointerId !== o.pid) return;
     o.px = e.clientX - o.gx - restX(o);
     o.py = e.clientY - o.gy - restY(o);
+    pushSample(o, e.clientX, e.clientY, performance.now());
     wake();
   }
 
@@ -181,7 +220,9 @@
     dragging--;
     o.el.classList.remove("grabbed");
     try { o.el.releasePointerCapture(e.pointerId); } catch (err) {}
-    if (cancelled) { o.vx = 0; o.vy = 0; }
+
+    if (cancelled || !throwVelocity(o, performance.now())) { o.vx = 0; o.vy = 0; }
+    o.samples.length = 0;
     wake();
   }
 
