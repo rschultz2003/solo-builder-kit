@@ -417,8 +417,11 @@ var FORM_ENDPOINT = ""; // <-- paste your Loops form endpoint here
     var panel = btn.nextElementSibling;
     var inner = panel.firstElementChild;
 
-    /* collapsed content stays out of the a11y tree, not just visually clipped */
-    if (btn.getAttribute("aria-expanded") !== "true") panel.style.visibility = "hidden";
+    /* inert takes the subtree out of BOTH the tab order and the
+       accessibility tree without touching layout, so the height animation
+       is unaffected. Not display:none or visibility:hidden: those suppress
+       rendering, which also hides the text from find-in-page. */
+    if (btn.getAttribute("aria-expanded") !== "true") panel.inert = true;
 
     function settle(e) {
       if (e && (e.target !== panel || e.propertyName !== "height")) return;
@@ -426,7 +429,7 @@ var FORM_ENDPOINT = ""; // <-- paste your Loops form endpoint here
       if (btn.getAttribute("aria-expanded") === "true") {
         panel.style.height = "auto";       /* so it reflows with the viewport */
       } else {
-        panel.style.visibility = "hidden";
+        panel.inert = true;                /* only once it is fully closed */
       }
     }
 
@@ -437,11 +440,11 @@ var FORM_ENDPOINT = ""; // <-- paste your Loops form endpoint here
 
       if (reduced) {
         panel.style.height = open ? "0px" : "auto";
-        panel.style.visibility = open ? "hidden" : "";
+        panel.inert = open;
         return;
       }
 
-      panel.style.visibility = "";
+      panel.inert = false;                 /* clear before it becomes reachable */
       panel.style.height = panel.getBoundingClientRect().height + "px";  /* pin where it is now */
       void panel.offsetHeight;                                           /* flush before retarget */
       panel.addEventListener("transitionend", settle);
