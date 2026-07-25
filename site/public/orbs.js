@@ -293,6 +293,7 @@
     o.pid = -1;
     dragging--;
     o.el.classList.remove("grabbed");
+    o.el.classList.remove("hot");
     try { o.el.releasePointerCapture(e.pointerId); } catch (err) {}
 
     if (cancelled || !throwVelocity(o, performance.now())) { o.vx = 0; o.vy = 0; }
@@ -302,10 +303,85 @@
 
   function bind(o) {
     var el = o.el;
-    el.addEventListener("pointerdown", function (e) { onDown(o, e); });
     el.addEventListener("pointermove", function (e) { onMove(o, e); }, { passive: true });
     el.addEventListener("pointerup", function (e) { onUp(o, e, false); }, { passive: true });
     el.addEventListener("pointercancel", function (e) { onUp(o, e, true); }, { passive: true });
+  }
+
+  /* ---- deciding whether an orb may take the pointer ----------------
+     Orbs paint above the page, and parallax sweeps them across every
+     section as you scroll, so there is no resting position that is
+     safe for the whole scroll range: an orb will sit over a link, a
+     button or a line of text at some offset. Placement alone cannot
+     satisfy "orbs never block a link, button or text selection".
+
+     So orbs are pointer-events:none by default and the decision is
+     made per pointerdown. The event lands on whatever is genuinely
+     underneath; an orb only claims it when that spot is inert. An orb
+     over a paragraph's empty right-hand gutter is still grabbable,
+     because the test uses the text's own line boxes rather than the
+     block's full width. */
+
+  var INTERACTIVE = "a,button,input,select,textarea,label,summary,[role=button],[contenteditable]";
+
+  function overText(el, x, y) {
+    for (var i = 0; i < el.childNodes.length; i++) {
+      var n = el.childNodes[i];
+      if (n.nodeType !== 3 || !n.nodeValue.trim()) continue;
+      var range = document.createRange();
+      range.selectNodeContents(n);
+      var rects = range.getClientRects();
+      for (var j = 0; j < rects.length; j++) {
+        var r = rects[j];
+        if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return true;
+      }
+    }
+    return false;
+  }
+
+  function spotIsClaimed(x, y) {
+    var el = document.elementFromPoint(x, y);
+    if (!el) return false;
+    if (el.closest && el.closest(INTERACTIVE)) return true;
+    return overText(el, x, y);
+  }
+
+  /* circle test, not the bounding box, so the corners of a sphere's box
+     never swallow a pointer that visually missed the orb */
+  function orbAt(x, y) {
+    scrollY = window.scrollY;
+    for (var i = orbs.length - 1; i >= 0; i--) {
+      var o = orbs[i];
+      if (!o.live) continue;
+      var dx = x - (restX(o) + o.px + o.rad);
+      var dy = y - (restY(o) + o.py + o.rad);
+      if (dx * dx + dy * dy <= o.rad * o.rad) return o;
+    }
+    return null;
+  }
+
+  function grabbable(x, y) {
+    var o = orbAt(x, y);
+    return (o && !spotIsClaimed(x, y)) ? o : null;
+  }
+
+  document.addEventListener("pointerdown", function (e) {
+    if (e.button > 0) return;
+    var o = grabbable(e.clientX, e.clientY);
+    if (o) onDown(o, e);
+  }, true);
+
+  /* cursor affordance only where a pointer can actually hover */
+  if (window.matchMedia("(hover: hover)").matches) {
+    var hot = null;
+    document.addEventListener("pointermove", function (e) {
+      if (dragging) return;
+      var o = grabbable(e.clientX, e.clientY);
+      if (o === hot) return;
+      if (hot) hot.el.classList.remove("hot");
+      hot = o;
+      if (hot) hot.el.classList.add("hot");
+    }, { passive: true });
   }
 
   /* ---- inputs ---- */

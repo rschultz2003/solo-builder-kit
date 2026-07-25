@@ -118,10 +118,14 @@ p{margin:0 0 18px}
 .orb-layer{position:fixed;inset:0;z-index:5;pointer-events:none}
 .orb-anchor{visibility:hidden}
 .orb-live{
-  position:absolute;left:0;top:0;pointer-events:auto;touch-action:none;cursor:grab;
+  position:absolute;left:0;top:0;pointer-events:none;touch-action:none;
   -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;
 }
-.orb-live.grabbed{cursor:grabbing}
+/* An orb only takes the pointer once /orbs.js has confirmed the spot
+   underneath is inert, so a link, button or line of text under an orb
+   always wins. */
+.orb-live.hot{pointer-events:auto;cursor:grab}
+.orb-live.grabbed{pointer-events:auto;cursor:grabbing}
 
 /* ============================================================
    NAV
@@ -307,8 +311,13 @@ footer{padding:64px 0 52px;border-top:1px solid var(--hair);margin-top:20px}
     display:inline-flex;margin-left:auto;background:none;border:0;cursor:pointer;
     padding:10px;color:var(--ink);
   }
-  #o1{width:200px;height:200px;top:-50px;right:-70px}
-  #o2{width:96px;height:96px;top:210px;right:20px}
+  /* Orbs now paint above content, so a resting orb that overlaps text
+     also swallows the tap that was meant to select it. At this width
+     the text column is full-bleed and leaves no lateral gap, so #o1
+     clears the eyebrow entirely and #o2 stands down, as #o3 already
+     does. Verified clash-free across the full scroll range. */
+  #o1{width:190px;height:190px;top:-115px;right:-75px}
+  #o2{display:none}
   #o3{display:none}
   .band{padding:72px 0}
   .capture{padding:46px 26px;border-radius:22px}

@@ -106,10 +106,14 @@ p{margin:0 0 20px}
 .orb-layer{position:fixed;inset:0;z-index:5;pointer-events:none}
 .orb-anchor{visibility:hidden}
 .orb-live{
-  position:absolute;left:0;top:0;pointer-events:auto;touch-action:none;cursor:grab;
+  position:absolute;left:0;top:0;pointer-events:none;touch-action:none;
   -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;
 }
-.orb-live.grabbed{cursor:grabbing}
+/* An orb only takes the pointer once /orbs.js has confirmed the spot
+   underneath is inert, so a link, button or line of text under an orb
+   always wins. */
+.orb-live.hot{pointer-events:auto;cursor:grab}
+.orb-live.grabbed{pointer-events:auto;cursor:grabbing}
 
 /* ---- hero ---- */
 .hero{position:relative;padding:80px 0 84px;overflow:hidden;text-align:center}
