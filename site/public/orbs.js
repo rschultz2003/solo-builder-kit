@@ -42,6 +42,32 @@
   var SAMPLE_MAX = 5;
   var THROW_MAX = 4200;      /* px/s, guards against absurd flick velocities */
 
+  /* ---- feel: heavy glass marble in light air ----
+     Both constants scale with radius off a 60px reference, so a big orb
+     coasts further and returns home more slowly: it reads as heavier.
+     Air drag is the only damping. Because AIR scales as sqrt(r0/r) and
+     the spring K as (r0/r), the damping ratio AIR/(2*sqrt(K)) lands at
+     ~0.95 for every size, so orbs of any radius settle just shy of
+     critical damping without oscillating. */
+  var R_REF = 60;
+  var AIR = 1.5;             /* velocity decays as exp(-AIR*dt): per second, not per frame */
+  var SPRING = 0.62;         /* omega^2 of the settle spring */
+  var BOUNCE = 0.76;         /* wall restitution */
+  var WALL_FRICTION = 0.94;  /* tangential loss on impact */
+  var FLIGHT_V = 55;         /* px/s: below this, walls stop being enforced */
+  var SLEEP_V = 8;           /* px/s */
+  var SLEEP_P = 0.6;         /* px */
+
+  /* A spring approaches rest asymptotically, so the last stretch is a
+     crawl: measured, a hard throw finished bouncing by ~3s but did not
+     reach the sleep threshold until ~12s, holding the rAF loop open for
+     nine seconds of motion nobody can see. Once an orb is both slow and
+     close, ease the remainder home over ~0.8s instead. It reads as the
+     orb arriving rather than creeping, and it sleeps far sooner. */
+  var CALM_P = 40;           /* px */
+  var CALM_V = 70;           /* px/s */
+  var CALM_RATE = 6;         /* per second */
+
   /* ---- document-space position, immune to ancestor transforms ----
      .capture sits inside a .reveal that animates translateY(22px) -> none,
      so getBoundingClientRect would capture a pre-reveal position and bake
@@ -101,6 +127,8 @@
       var p = docPos(o.anchor);
       o.ax = p.x; o.ay = p.y;
       o.w = w; o.h = h; o.rad = w / 2;
+      o.air = AIR * Math.sqrt(R_REF / o.rad);
+      o.k = SPRING * (R_REF / o.rad);
       o.el.style.width = w + "px";
       o.el.style.height = h + "px";
       o.el.style.opacity = getComputedStyle(o.anchor).opacity;
@@ -117,6 +145,49 @@
       "translate3d(" + (restX(o) + o.px) + "px," + (restY(o) + o.py) + "px,0)";
   }
 
+  /* ---- integrate one orb ----
+     Semi-implicit Euler on the physics offset p. Everything is in
+     seconds, so behaviour is identical at 60Hz, 120Hz ProMotion, and
+     on a throttled tab (where dt is clamped to DT_MAX).
+
+     Walls act on the rendered position, but only while the orb still
+     carries real speed. Once it drops below FLIGHT_V the spring is
+     left alone to walk p back to zero, which is what lets an orb whose
+     rest position has scrolled off screen settle there instead of
+     grinding against an edge forever. */
+  function step(o, dt) {
+    o.vx += -o.k * o.px * dt;
+    o.vy += -o.k * o.py * dt;
+
+    var decay = Math.exp(-o.air * dt);
+    o.vx *= decay;
+    o.vy *= decay;
+
+    o.px += o.vx * dt;
+    o.py += o.vy * dt;
+
+    var speed = Math.sqrt(o.vx * o.vx + o.vy * o.vy);
+    if (speed > FLIGHT_V) {
+      var x = restX(o) + o.px, y = restY(o) + o.py;
+      if (x < 0)          { o.px -= x;               o.vx = -o.vx * BOUNCE; o.vy *= WALL_FRICTION; }
+      else if (x + o.w > vw) { o.px -= x + o.w - vw; o.vx = -o.vx * BOUNCE; o.vy *= WALL_FRICTION; }
+      if (y < 0)          { o.py -= y;               o.vy = -o.vy * BOUNCE; o.vx *= WALL_FRICTION; }
+      else if (y + o.h > vh) { o.py -= y + o.h - vh; o.vy = -o.vy * BOUNCE; o.vx *= WALL_FRICTION; }
+    }
+
+    if (speed < CALM_V && Math.abs(o.px) < CALM_P && Math.abs(o.py) < CALM_P) {
+      var calm = Math.exp(-CALM_RATE * dt);
+      o.px *= calm; o.py *= calm;
+      o.vx *= calm; o.vy *= calm;
+      speed *= calm;
+    }
+
+    if (speed < SLEEP_V && Math.abs(o.px) < SLEEP_P && Math.abs(o.py) < SLEEP_P) {
+      o.px = 0; o.py = 0; o.vx = 0; o.vy = 0;
+      o.asleep = true;
+    }
+  }
+
   /* ---- the one loop, for every orb ---- */
   function tick(now) {
     if (!running) return;
@@ -129,6 +200,7 @@
     for (var i = 0; i < orbs.length; i++) {
       var o = orbs[i];
       if (!o.live) continue;
+      if (!o.asleep && !o.held && dt > 0) step(o, dt);
       if (!o.asleep) busy = true;
       if (!o.asleep || dirty) draw(o);
     }
