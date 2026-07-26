@@ -6,6 +6,18 @@ A running log of the meaningful choices in this project and why. Newest at the t
 
 ---
 
+## 2026-07-26 — Per-frame "Animation" style invalidations are not a compositing signal
+**Finding:** A trace of a hard throw showed 6 `StyleRecalcInvalidationTracking` events per frame with reason `Animation`, one per element running the float keyframes. The obvious reading — that the animations are not compositor-accelerated and are ticking on the main thread — is **wrong**.
+**How it was settled:** six probe elements, all running the identical float keyframes, differing only in surrounding condition: plain in the body; inside a parent whose inline transform is rewritten every frame; with `backdrop-filter` on itself; inside a `clip-path` parent; inside a rounded `overflow:hidden` parent; and one with `will-change:transform`. **All six recorded exactly 1.00 invalidation per frame, including the plain control and the `will-change` case.**
+**Conclusion:** Blink records this event once per frame for any element with a running CSS animation, regardless of whether that animation is compositor-driven. The count is bookkeeping, not a cost signal and not a promotion signal. There is therefore no "get the animations accelerated" lever worth ~469ms; that lever does not exist as described.
+**What this does not establish:** whether the animations actually are composited. The invalidation count is silent either way. Answering that properly needs the cc layer tree, which the tooling here does not expose.
+**Also ruled out:** ancestor clips. An A/B with `clip-path` removed from the orb layer and rounded `overflow:hidden` removed from `.capture` produced 6.00 invalidations per frame either way.
+**Generalises:** an event count in a trace is not a cost, and a per-frame event is not evidence of a slow path. Establish the baseline with a control before reading a number as a defect.
+
+## 2026-07-26 — If the progress bar jump ever needs fixing, animate it
+**Decision:** Left as-is. Bulk expand changes document height in one frame, so the progress bar jumps backwards (~10.6 points at 5 accordions, more at 19). It is never wrong: the `ResizeObserver` corrects it within 50ms and collapse restores it exactly.
+**Why note it:** the artifact is the *discontinuity*, not the value. A reader appearing to lose progress is a small perception cost on a page whose job is getting people down to the capture field, and it scales with accordion count. If it becomes worth fixing, the fix is transitioning the bar to its new value rather than snapping — not recomputing anything.
+
 ## 2026-07-25 — Expand-all belongs at the top of the document, not per part
 **Decision:** When Parts 02 onward land on `/playbook`, move the "Expand all" control to a single instance at the top of the document. Do not add one per part.
 **Why:** Both use cases it serves are document-wide, not section-wide: linear reading by a screen reader, and find-in-page. A per-part control serves neither, and multiplies a low-value affordance once per section.
