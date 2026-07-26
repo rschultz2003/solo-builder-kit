@@ -461,6 +461,21 @@
     if (o) onDown(o, e);
   }, true);
 
+  /* Touch devices need this or a drag never survives.
+     touch-action is only consulted on the hit-test target, and an element with
+     pointer-events:none is never the hit-test target. So the touch-action:none
+     on .orb-live never applied: at the moment iOS arbitrated the gesture the
+     target was the page, Safari started a pan, and a pan cancels the pointer.
+     Measured on an iPhone before this: 8 of 9 orb drags cancelled, most inside
+     100ms. Preventing the default on touchstart stops the pan before it starts,
+     and keeps pointer-events:none so links and text still win the tap. */
+  document.addEventListener("touchstart", function (e) {
+    if (anyOrbHeld()) { e.preventDefault(); return; }
+    if (e.touches.length !== 1) return;
+    var t = e.touches[0];
+    if (grabbable(t.clientX, t.clientY)) e.preventDefault();
+  }, { passive: false });
+
   /* cursor affordance only where a pointer can actually hover */
   if (window.matchMedia("(hover: hover)").matches) {
     var hot = null;
