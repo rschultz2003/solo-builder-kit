@@ -120,6 +120,10 @@ p{margin:0 0 18px}
    orbs are cloned into one fixed, full-viewport layer so they can travel
    past section edges. The layer never swallows a click; each orb does. */
 .orb-layer{position:fixed;inset:0;z-index:5;pointer-events:none}
+/* Touch: the layer lives inside .hero instead, so the compositor moves it
+   with the page and scroll never reaches JS. .hero's own overflow:hidden
+   does the containment, so no clip-path and no parallax here. */
+.orb-layer-flow{position:absolute;z-index:auto;clip-path:none!important}
 .orb-anchor{visibility:hidden}
 .orb-live{
   position:absolute;left:0;top:0;pointer-events:none;touch-action:none;

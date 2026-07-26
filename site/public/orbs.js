@@ -38,6 +38,23 @@
   var heroBottomDoc = Infinity;
   var floorY = 0;            /* hero bottom in screen coords, this frame */
 
+  /* On a touch device the page scrolls on the compositor while a fixed layer
+     has to be repositioned from window.scrollY by JS, one frame later. At
+     58.8Hz with a fast flick moving ~70px per frame that is ~80px of visible
+     lag, measured on an iPhone as 50 separate errors of exactly one frame.
+     No amount of tuning fixes it: the work is on the wrong thread.
+
+     So on coarse pointers the layer goes into the document instead, inside
+     .hero-orbs, where the compositor moves it with the page for free and
+     scroll never touches JS at all. Orb positions become hero-local and lose
+     their scroll term entirely, which also means no parallax on touch and no
+     clip-path (.hero's own overflow:hidden already contains them). The loop
+     no longer wakes on scroll either, which is a battery win. */
+  var FLOW = window.matchMedia("(pointer: coarse)").matches;
+  var flowHost = FLOW ? document.querySelector(".hero-orbs") : null;
+  if (!flowHost) FLOW = false;
+  var layerW = 0, layerH = 0, layerDocX = 0, layerDocY = 0;
+
   var orbs = [];
   var layer = null;
   var vw = 0, vh = 0;
@@ -101,7 +118,7 @@
 
   function build() {
     layer = document.createElement("div");
-    layer.className = "orb-layer";
+    layer.className = FLOW ? "orb-layer orb-layer-flow" : "orb-layer";
     layer.setAttribute("aria-hidden", "true");
 
     for (var i = 0; i < anchors.length; i++) {
@@ -145,7 +162,7 @@
       bind(orbs[orbs.length - 1]);
       layer.appendChild(el);
     }
-    document.body.appendChild(layer);
+    (FLOW ? flowHost : document.body).appendChild(layer);
     measure();
   }
 
@@ -168,6 +185,14 @@
     syncViewport();
     heroBottomDoc = hero ? docPos(hero).y + hero.offsetHeight : Infinity;
     floorY = Math.max(0, Math.min(vh, heroBottomDoc - window.scrollY));
+    /* in flow mode every coordinate is relative to the layer's own box */
+    var originX = 0, originY = 0;
+    if (FLOW) {
+      var lp = docPos(layer);
+      originX = lp.x; originY = lp.y;
+      layerDocX = lp.x; layerDocY = lp.y;
+      layerW = layer.offsetWidth; layerH = layer.offsetHeight;
+    }
     for (var i = 0; i < orbs.length; i++) {
       var o = orbs[i];
       var w = o.anchor.offsetWidth, h = o.anchor.offsetHeight;
@@ -179,7 +204,7 @@
       if (!o.live && o.held) release(o, true);
       if (!o.live) continue;
       var p = docPos(o.anchor);
-      o.ax = p.x; o.ay = p.y;
+      o.ax = p.x - originX; o.ay = p.y - originY;
       o.w = w; o.h = h; o.rad = w / 2;
       o.air = AIR * Math.sqrt(R_REF / o.rad);
       o.k = SPRING * (R_REF / o.rad);
@@ -192,7 +217,16 @@
   }
 
   function restX(o) { return o.ax; }
-  function restY(o) { return o.ay - scrollY * (1 + o.depth); }
+  function restY(o) { return FLOW ? o.ay : o.ay - scrollY * (1 + o.depth); }
+
+  /* Pointer coordinates are screen-space; orb coordinates are layer-space.
+     In fixed mode the layer sits at the viewport origin so the two coincide.
+     In flow mode the layer scrolls with the document, so everything that
+     touches a pointer has to convert. */
+  function originScreenX() { return FLOW ? layerDocX - window.scrollX : 0; }
+  function originScreenY() { return FLOW ? layerDocY - window.scrollY : 0; }
+  function screenX(o) { return originScreenX() + restX(o) + o.px; }
+  function screenY(o) { return originScreenY() + restY(o) + o.py; }
 
   function draw(o) {
     o.el.style.transform =
@@ -220,6 +254,9 @@
     o.px += o.vx * dt;
     o.py += o.vy * dt;
 
+    var boundR = FLOW ? layerW : vw;
+    var boundB = FLOW ? layerH : floorY;
+
     var speed = Math.sqrt(o.vx * o.vx + o.vy * o.vy);
 
     /* Walls apply only while the orb is still carrying throw energy, and
@@ -234,15 +271,15 @@
 
     if (o.flying) {
       var x = restX(o) + o.px, y = restY(o) + o.py;
-      if (x < 0)          { o.px -= x;               o.vx = -o.vx * BOUNCE; o.vy *= WALL_FRICTION; }
-      else if (x + o.w > vw) { o.px -= x + o.w - vw; o.vx = -o.vx * BOUNCE; o.vy *= WALL_FRICTION; }
+      if (x < 0)          { o.px -= x;                       o.vx = -o.vx * BOUNCE; o.vy *= WALL_FRICTION; }
+      else if (x + o.w > boundR) { o.px -= x + o.w - boundR;  o.vx = -o.vx * BOUNCE; o.vy *= WALL_FRICTION; }
       /* the floor is the hero's bottom edge, not the viewport's, so a
          thrown orb bounces back up instead of sailing into the content
          below. Skipped once the hero is too short to hold the orb,
          which is what lets it leave cleanly as the section scrolls off. */
       if (y < FLOAT_MAX)  { o.py += FLOAT_MAX - y;   o.vy = -o.vy * BOUNCE; o.vx *= WALL_FRICTION; }
-      else if (floorY > o.h && y + o.h > floorY) {
-        o.py -= y + o.h - floorY; o.vy = -o.vy * BOUNCE; o.vx *= WALL_FRICTION;
+      else if (boundB > o.h && y + o.h > boundB) {
+        o.py -= y + o.h - boundB; o.vy = -o.vy * BOUNCE; o.vx *= WALL_FRICTION;
       }
     }
 
@@ -266,15 +303,16 @@
     var dt = lastT ? Math.min((now - lastT) / 1000, DT_MAX) : 0;
     lastT = now;
 
-    scrollY = window.scrollY;
-
-    /* clip the layer to the first section, so an orb is never painted
-       over the content below it — the same containment .hero's
-       overflow:hidden used to give, but without re-clipping the sides */
-    floorY = heroBottomDoc - scrollY;
-    if (floorY > vh) floorY = vh;
-    if (floorY < 0) floorY = 0;
-    layer.style.clipPath = "inset(0 0 " + (vh - floorY) + "px 0)";
+    /* In flow mode the layer is inside .hero and the compositor moves it, so
+       nothing here depends on scroll and .hero's overflow:hidden does the
+       clipping. Fixed mode has to recompute both every frame. */
+    if (!FLOW) {
+      scrollY = window.scrollY;
+      floorY = heroBottomDoc - scrollY;
+      if (floorY > vh) floorY = vh;
+      if (floorY < 0) floorY = 0;
+      layer.style.clipPath = "inset(0 0 " + (vh - floorY) + "px 0)";
+    }
 
     var busy = false;
     var anyHeld = false;
@@ -346,8 +384,8 @@
     o.vx = 0; o.vy = 0;                    /* grabbing kills existing motion */
 
     /* preserve where in the orb the pointer landed */
-    o.gx = e.clientX - (restX(o) + o.px);
-    o.gy = e.clientY - (restY(o) + o.py);
+    o.gx = e.clientX - screenX(o);
+    o.gy = e.clientY - screenY(o);
 
     o.samples.length = 0;
     pushSample(o, e.clientX, e.clientY, performance.now());
@@ -363,10 +401,18 @@
     if (!o.held || e.pointerId !== o.pid) return;
     /* keep the dragged orb inside the playfield, or it would disappear
        under the clip while still dutifully following the pointer */
-    var x = e.clientX - o.gx, y = e.clientY - o.gy;
-    var maxX = vw - o.w, maxY = floorY - o.h;
-    if (x < 0) x = 0; else if (x > maxX) x = maxX;
-    if (y < FLOAT_MAX) y = FLOAT_MAX; else if (maxY > FLOAT_MAX && y > maxY) y = maxY;
+    var x = e.clientX - o.gx - originScreenX();
+    var y = e.clientY - o.gy - originScreenY();
+    /* Fixed mode clamps to the viewport so a dragged orb cannot vanish under
+       the clip. Flow mode must not: the authored rest positions deliberately
+       bleed outside the hero box (#o1 sits at top:-115px), so clamping to it
+       would yank the orb the moment you grabbed it. .hero's overflow:hidden
+       is the containment there, and the spring brings it home on release. */
+    if (!FLOW) {
+      var maxX = vw - o.w, maxY = floorY - o.h;
+      if (x < 0) x = 0; else if (x > maxX) x = maxX;
+      if (y < FLOAT_MAX) y = FLOAT_MAX; else if (maxY > FLOAT_MAX && y > maxY) y = maxY;
+    }
     o.px = x - restX(o);
     o.py = y - restY(o);
     pushSample(o, e.clientX, e.clientY, performance.now());
@@ -450,8 +496,8 @@
       /* cheap reject first. The carrier does not know about the float
          bob, so widen by the keyframe amplitude before paying for a
          layout read; most pointer positions never get past this. */
-      var dx = x - (restX(o) + o.px + o.rad);
-      var dy = y - (restY(o) + o.py + o.rad);
+      var dx = x - (screenX(o) + o.rad);
+      var dy = y - (screenY(o) + o.rad);
       var slack = o.rad + FLOAT_MAX;
       if (dx * dx + dy * dy > slack * slack) continue;
       /* exact: the skin is where the orb is actually painted */
@@ -503,10 +549,12 @@
   }
 
   /* ---- inputs ---- */
-  window.addEventListener("scroll", function () {
-    dirty = true;
-    wake();
-  }, { passive: true });
+  if (!FLOW) {
+    window.addEventListener("scroll", function () {
+      dirty = true;
+      wake();
+    }, { passive: true });
+  }
 
   /* Viewport size is corrected immediately; the expensive part (anchor
      positions, per-orb geometry) stays debounced, since real layout changes
