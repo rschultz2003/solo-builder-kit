@@ -6,13 +6,28 @@ A running log of the meaningful choices in this project and why. Newest at the t
 
 ---
 
+## 2026-07-26 — Establish what a measurement means before reading meaning into its value
+**Rule:** A number is not a finding until you know what it would look like if nothing were wrong.
+
+Three times in this PR a number was read as evidence for something it did not establish:
+
+1. **A speed threshold treated as a settled-state flag.** Wall enforcement gated on current velocity, on the assumption that a slow orb had settled. The spring kept driving it back through the threshold, producing a limit cycle that never slept.
+2. **A single profiling run treated as an attribution.** One trace showed an 11.5 ms worst-frame penalty for `backdrop-filter`. Repeat runs reversed the direction. The effect was nearly deleted for nothing.
+3. **A per-frame event count treated as a cost.** 6 `Animation` style invalidations per frame read as proof the float animations were not accelerated, and a ~469 ms optimisation lever built on top of it. A plain control probe showed the identical count with nothing wrong.
+
+In each case the fix was the same shape: find the baseline first — an explicit state flag, a repeat run, a control probe. The instinct to reach for is *"what does this number read when the system is healthy?"* rather than *"what could explain this number being bad?"* The second question is unfalsifiable and invites a hypothesis hunt; the first ends it in minutes.
+
+Per-instance detail is in the three entries below.
+
 ## 2026-07-26 — Per-frame "Animation" style invalidations are not a compositing signal
 **Finding:** A trace of a hard throw showed 6 `StyleRecalcInvalidationTracking` events per frame with reason `Animation`, one per element running the float keyframes. The obvious reading — that the animations are not compositor-accelerated and are ticking on the main thread — is **wrong**.
 **How it was settled:** six probe elements, all running the identical float keyframes, differing only in surrounding condition: plain in the body; inside a parent whose inline transform is rewritten every frame; with `backdrop-filter` on itself; inside a `clip-path` parent; inside a rounded `overflow:hidden` parent; and one with `will-change:transform`. **All six recorded exactly 1.00 invalidation per frame, including the plain control and the `will-change` case.**
 **Conclusion:** Blink records this event once per frame for any element with a running CSS animation, regardless of whether that animation is compositor-driven. The count is bookkeeping, not a cost signal and not a promotion signal. There is therefore no "get the animations accelerated" lever worth ~469ms; that lever does not exist as described.
-**What this does not establish:** whether the animations actually are composited. The invalidation count is silent either way. Answering that properly needs the cc layer tree, which the tooling here does not expose.
+**What this does not establish directly:** whether the animations actually are composited. The invalidation count is silent either way, and the cc layer tree is not exposed by the tooling used here.
+**But the same trace answers it indirectly, and strongly:** main-thread painting over that window was **1.4 ms across 1456 frames** — essentially zero repainting. A transform animation on an element *without* its own composited layer dirties the parent layer's region every frame and forces a repaint of the area it travels through; four orbs crossing the viewport would produce a large, obvious paint number. 1.4 ms is not that. So the orbs almost certainly do have their own layers and the animations almost certainly are compositor-driven. **Strong indirect evidence, not proof** — and it was sitting in the data before the probe was ever written. Caveat: compositor-thread (277 ms) and GPU-process (382 ms) time could not be sub-categorised by this tooling and is bucketed as system/other; the 1.4 ms figure is main-thread paint specifically, which is the number the dirty-region mechanism would move.
+**Not pursued further:** `LayerTree.enable` over CDP would settle it definitively, but no decision hangs on the answer — the mitigations stay unwarranted either way at a ~15% duty cycle. Curiosity, not engineering. Logged and stopped.
 **Also ruled out:** ancestor clips. An A/B with `clip-path` removed from the orb layer and rounded `overflow:hidden` removed from `.capture` produced 6.00 invalidations per frame either way.
-**Generalises:** an event count in a trace is not a cost, and a per-frame event is not evidence of a slow path. Establish the baseline with a control before reading a number as a defect.
+**General case:** see "Establish what a measurement means before reading meaning into its value" above.
 
 ## 2026-07-26 — If the progress bar jump ever needs fixing, animate it
 **Decision:** Left as-is. Bulk expand changes document height in one frame, so the progress bar jumps backwards (~10.6 points at 5 accordions, more at 19). It is never wrong: the `ResizeObserver` corrects it within 50ms and collapse restores it exactly.
