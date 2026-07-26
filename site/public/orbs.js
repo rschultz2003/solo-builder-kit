@@ -149,10 +149,23 @@
     measure();
   }
 
-  /* ---- all layout reads happen here, never in the loop ---- */
-  function measure() {
+  /* Viewport only. Two reads, cheap enough to run on every viewport event
+     rather than behind a debounce. Safari's URL bar swings innerHeight by
+     ~190px across ~180 resize events during a scroll, and a debounce that
+     keeps getting reset never fires while that is happening, so the clip and
+     the physics floor ran on stale geometry and then snapped. Measured before
+     this: 9 position errors over 20px attributed to viewport changes, worst
+     172.8px. */
+  function syncViewport() {
     vw = document.documentElement.clientWidth;
     vh = document.documentElement.clientHeight;
+    dirty = true;
+    wake();
+  }
+
+  /* ---- all layout reads happen here, never in the loop ---- */
+  function measure() {
+    syncViewport();
     heroBottomDoc = hero ? docPos(hero).y + hero.offsetHeight : Infinity;
     floorY = Math.max(0, Math.min(vh, heroBottomDoc - window.scrollY));
     for (var i = 0; i < orbs.length; i++) {
@@ -495,11 +508,21 @@
     wake();
   }, { passive: true });
 
+  /* Viewport size is corrected immediately; the expensive part (anchor
+     positions, per-orb geometry) stays debounced, since real layout changes
+     are rare and a URL bar sliding does not move anything in the document. */
   var resizeTimer = 0;
-  window.addEventListener("resize", function () {
+  function scheduleMeasure() {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(measure, 120);
+  }
+  window.addEventListener("resize", function () {
+    syncViewport();
+    scheduleMeasure();
   }, { passive: true });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", syncViewport, { passive: true });
+  }
 
   document.addEventListener("visibilitychange", function () {
     if (document.hidden) { running = false; lastT = 0; }
