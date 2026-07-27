@@ -24,13 +24,14 @@ Static HTML. No build step, no framework, no dependencies.
 
 Three things, in order:
 
-1. **Connect the form.** Loops.so → Forms → create form → copy the endpoint
-   (`https://app.loops.so/api/newsletter-form/XXXXXXXX`).
-   Paste it into `FORM_ENDPOINT` at the top of the `<script>` block in **both**
-   `public/index.html` and `public/playbook/index.html`. The two values must match.
+1. ~~**Connect the form.**~~ Done. `FORM_ENDPOINT` is set to the Loops
+   newsletter-form endpoint in both `public/index.html` and
+   `public/playbook/index.html`, and the two values match.
 
-   Until it is set, the form fails loudly with a visible message rather than
-   silently swallowing signups. That is intentional. Do not ship without it.
+   If you ever change it, change it in both. When the value is empty the form
+   fails loudly with a visible message rather than silently swallowing
+   signups; that behaviour is deliberate, so never replace it with a
+   placeholder.
 
 2. **Fill the playbook gaps.** `public/playbook/index.html` has principles 01 and 02
    written. Principles 03 to 05 and Parts 02 onward are placeholders, marked with a

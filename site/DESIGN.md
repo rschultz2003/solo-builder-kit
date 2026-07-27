@@ -97,8 +97,8 @@ Push on these:
 
 ## Known gaps
 
-- `FORM_ENDPOINT` is empty in both pages. Loops.so form endpoint goes there. Keep the two
-  values identical.
+- ~~`FORM_ENDPOINT` is empty in both pages.~~ Connected. Loops.so newsletter-form
+  endpoint is set in both pages and the two values match. Keep them identical.
 - `/playbook` has principles 01 and 02 written. Principles 03 to 05 and Parts 02 onward are
   placeholders marked with a `.todo` block. Structure is done, it is copy-in only.
 - No favicon yet.
