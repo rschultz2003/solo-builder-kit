@@ -73,6 +73,31 @@ Per-instance detail is in the three entries below.
 **Why:** The settle is deliberately weak so a throw reads as a throw. Measured, that meant bouncing finished by ~3s but the sleep threshold was not reached until ~12s, holding the rAF loop open for nine seconds of motion nobody can see. Sleep now lands at 8.4s.
 **Tradeoffs:** The last stretch is not strictly spring motion. Visually it reads as arriving rather than creeping.
 
+## 2026-07-27 — The PDF is generated from the playbook page, not authored separately
+**Decision:** `public/the-solo-builders-playbook.pdf` is rendered from `public/playbook/index.html` through a print stylesheet, via headless Chrome over the DevTools Protocol (`og/render-pdf.mjs`). There is no second document.
+**Why:** A hand-built PDF is a fork. The moment either copy is edited the two say different things, and the one that is wrong is always the one already sitting in someone's downloads folder. Generating it means the page is the only place the words live.
+**Tradeoffs:** The layout has to survive a fragmenter, which is a genuinely different constraint from a scrolling viewport, and print-only rules now live in the page. Regeneration is a manual step, so an edit to the page silently leaves a stale PDF until someone runs the script — the README says so next to the command.
+
+## 2026-07-27 — The PDF is a public URL, and reachable without giving an email
+**Decision:** Serve the PDF at a plain static path, list it in `sitemap.xml`, and deliver it from Loops as a link rather than an attachment.
+**Why:** The file's job is to travel. Most people who read it will have been forwarded it, and a gated file cannot be forwarded — the friend hits a form instead of the thing they were promised. A link also always serves the current version, where an attachment is frozen at send time and costs deliverability on every signup.
+**Tradeoffs:** Anyone who finds the URL skips the capture form entirely, and indexing it invites exactly that. The bet is that reach is worth more than the emails lost to it, given the whole point of a lead magnet is that people pass it around. Revisit if the PDF starts outranking the playbook page itself.
+
+## 2026-07-27 — Print CSS is edited in place, not appended to
+**Decision:** One rule per selector in the print block. Tightening print spacing means editing the existing rule, not adding a later one.
+**Why:** Three separate fixes silently did nothing because the selector already existed higher in the same block carrying `!important` — `.acc-btn`, `.acc-inner`, and `.pdf-cover`'s `display:flex` losing to `.pdf-only{display:block !important}`. Each looked applied, each rendered, and pagination came back byte-identical. The tell was that: an edit that reaches layout always moves something. Identical output after a real change means the change never landed, and that is worth checking before tuning the value again.
+**Tradeoffs:** None. The duplicate rules were dead weight.
+
+## 2026-07-27 — Chromium does not fragment grid containers when printing
+**Decision:** In print, `.steps`, `.weeks` and `.daily` become `display:block` with their `gap` restated as a margin. `.acc-item` is not `break-inside:avoid`.
+**Why:** Each part's body sat in a single-column grid. Chromium treats grid containers as monolithic across page breaks, so a body that did not fit under its own heading moved to the next page whole, leaving the heading and intro note alone on a near-empty page — twice. `break-inside:avoid` on `.acc-item` did the same thing to individual principles. Single-column grid and block flow lay out identically, so the fix costs nothing visually.
+**Tradeoffs:** `.kit` is genuinely multi-column and stays a grid, so it can still be pushed whole. It is one screen tall and has not needed to split.
+
+## 2026-07-27 — PDF metadata is written as an incremental update
+**Decision:** After `Page.printToPDF`, append a new `/Info` object, a one-entry xref section and a trailer chaining to the previous one via `/Prev`.
+**Why:** Chrome takes `/Title` from the page's `<title>`, which is "Start here", and `printToPDF` accepts no metadata options. The file is meant to arrive by email and sit in Drive listings, where those fields are the only thing telling anyone what it is. Renaming the page's `<title>` to suit the PDF would have made the web page worse to serve the file.
+**Tradeoffs:** Hand-written PDF structure. It is the mechanism the spec defines for exactly this and leaves every byte Chrome wrote untouched, but it assumes a classic xref table — if Chrome ever emits cross-reference streams the helper throws rather than corrupting the file. Verified with `pdfinfo` on every render.
+
 ---
 
 ## 2026-01-01 — Example: chose Neon over local Postgres

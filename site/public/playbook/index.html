@@ -332,10 +332,12 @@ footer{padding:56px 0 48px;border-top:1px solid var(--hair)}
   .nav,.progress,.acc-tools,.orb-layer,.hero-orbs,.hero,
   #get,.capture,footer,.form,.form-note,.form-msg{display:none !important}
 
-  /* the cover: print-only, and the only page without a running footer */
+  /* the cover, print-only. It carries the running footer like every other
+     page: Chromium draws the footer in the margin box given to printToPDF,
+     which no @page rule can reach. */
   .pdf-only{display:block !important}
   .pdf-cover{
-    break-after:page;min-height:232mm;display:flex;flex-direction:column;
+    break-after:page;min-height:232mm;display:flex !important;flex-direction:column;
     justify-content:space-between;padding:0;
   }
 
@@ -343,9 +345,9 @@ footer{padding:56px 0 48px;border-top:1px solid var(--hair)}
   .acc-panel{height:auto !important;overflow:visible !important;visibility:visible !important}
   .acc-panel[inert]{display:block !important}
   .acc-sign{display:none !important}
-  .acc-btn{padding:18px 0 6px !important;cursor:auto;width:100%}
+  .acc-btn{padding:11px 0 5px !important;cursor:auto;width:100%}
   .acc-item{border-bottom:1px solid var(--hair)}
-  .acc-inner{padding:0 0 20px 0 !important}
+  .acc-inner{padding:0 0 13px 0 !important}
 
   /* nothing may split */
   h1,h2,h3,.acc-btn,.part-head{break-after:avoid;page-break-after:avoid}
@@ -399,13 +401,6 @@ footer{padding:56px 0 48px;border-top:1px solid var(--hair)}
      boxes are monolithic to the fragmenter */
   .reveal{opacity:1 !important;transform:none !important}
 
-  /* the accordion's generous padding is sized for thumbs, which paper does not
-     have. Reclaiming it is what lets each part's closing pull-quote sit on the
-     same page as the part rather than alone on the next one. */
-  .acc{margin-top:24px}
-  .acc-btn{padding:14px 4px;font-size:15pt}
-  .acc-inner{padding:0 4px 16px 56px}
-  .fig{padding:14px 0 18px}
 
   .pull{margin:20px 0 0;font-size:15pt;line-height:1.25;break-before:avoid;page-break-before:avoid}
   .bigline{margin:16px 0 0;font-size:14pt;break-before:avoid;page-break-before:avoid}
@@ -421,7 +416,11 @@ footer{padding:56px 0 48px;border-top:1px solid var(--hair)}
   .step{padding:14px 16px;border-radius:10px}
   .kit{gap:10px}
   .kit-card{padding:14px 16px;border-radius:10px}
-  .fig{padding:18px 0 20px}
+  .fig{padding:14px 0 16px}
+  /* the curve is the tallest single component in the book; on screen it gets a
+     full-width block, on paper that alone was pushing Part 01's pull-quote to
+     a page of its own */
+  .fig svg{max-height:66mm;width:auto;margin:0 auto}
 }
 
 @media (prefers-reduced-motion:reduce){
@@ -452,7 +451,7 @@ footer{padding:56px 0 48px;border-top:1px solid var(--hair)}
 </nav>
 
 <!-- ═══════════════════ PDF COVER (print only) ═══════════════════ -->
-<div class="pdf-only pdf-cover" aria-hidden="true">
+<div class="pdf-only pdf-cover">
   <div class="cover-top">
     <span class="cover-orbs">
       <span class="cover-orb a"></span><span class="cover-orb b"></span><span class="cover-orb c"></span>
