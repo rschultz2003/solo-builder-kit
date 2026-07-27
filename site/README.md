@@ -37,6 +37,14 @@ Three things, in order:
 2. ~~**Fill the playbook gaps.**~~ Done. All five parts, the intro and the close
    are written in `public/playbook/index.html`, and the `.todo` block is gone.
 
+   The text is verbatim from the original July build,
+   `the-solo-builders-playbook.html`. Keep that file: a first pass at
+   restoring the content silently paraphrased two intro sentences, stripped
+   contractions, dropped the intro's closing line and shipped only one of
+   Part 03's five toolkit groups. All of it was caught by diffing the page
+   against the original sentence by sentence, which is worth redoing after
+   any content edit.
+
 3. ~~**Add a favicon.**~~ Done. `favicon.svg`, `favicon.ico` (32x32) and
    `apple-touch-icon.png` (180x180) ship in `public/`, linked from both pages.
    Render source is `og/favicon.html`; `og/favicon-proof.png` is the 16/32/180
@@ -92,8 +100,9 @@ and writes the PDF metadata. Check the result before committing:
 pdfinfo public/the-solo-builders-playbook.pdf
 ```
 
-Twelve A4 pages, ~460K, real selectable text with the fonts subset and
-embedded. Every page carries `reubendorje.com` in the footer, and the cover,
+Nineteen A4 pages, ~1MB, real selectable text with the fonts subset and
+embedded. The size is mostly the two full-bleed dark pages and the cover
+gradient. Every page carries `reubendorje.com` in the footer, and the cover,
 the sign-off and the closing block all link back, because the file is meant to
 travel: most people who open it will have been forwarded it by a friend, not
 downloaded it themselves.

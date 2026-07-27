@@ -98,6 +98,21 @@ Per-instance detail is in the three entries below.
 **Why:** Chrome takes `/Title` from the page's `<title>`, which is "Start here", and `printToPDF` accepts no metadata options. The file is meant to arrive by email and sit in Drive listings, where those fields are the only thing telling anyone what it is. Renaming the page's `<title>` to suit the PDF would have made the web page worse to serve the file.
 **Tradeoffs:** Hand-written PDF structure. It is the mechanism the spec defines for exactly this and leaves every byte Chrome wrote untouched, but it assumes a classic xref table — if Chrome ever emits cross-reference streams the helper throws rather than corrupting the file. Verified with `pdfinfo` on every render.
 
+## 2026-07-28 — The PDF's contents page and part indexes are generated, not authored
+**Decision:** The contents page, the per-part "in this part" lists and the running rail are built from the DOM at print time by a `beforeprint` handler, not written into the markup.
+**Why:** Every one of them restates headings that already exist. Authoring them creates a second copy of the same text, and the failure mode is silent: the copies drift and nobody notices until a reader spots a contents entry that does not match the page it points at. Generating them means there is exactly one place each heading lives.
+**Tradeoffs:** The scaffold borrows real headings into a wrapper so the opener can fill its page, which made the teardown destructive on a second run and briefly deleted five pages of content. Teardown now returns borrowed nodes before clearing. Page numbers are not shown in the contents, because they are not known until after layout.
+
+## 2026-07-28 — The PDF has no per-part running head
+**Decision:** The running rail and folio appear on every page. The part label appears once, at the top of each part, not on every page of it.
+**Why:** A `position:fixed` element repeats on every printed page in Chromium regardless of which section it sits in, so a per-part label cannot be expressed in CSS. Tested both alternatives: rendering per part and merging with `pdfunite` keeps the links but destroys the accessibility tagging (`Tagged: yes` becomes `no`), and explicit pagination would hand-place content into fixed-height page boxes, which breaks the single-source-of-truth property the whole document depends on.
+**Tradeoffs:** One element of the design is knowingly not reproduced. Losing screen-reader structure on a file whose whole purpose is to be forwarded is a worse trade than losing a label.
+
+## 2026-07-28 — Content is verified by diffing against the original, not by reading
+**Decision:** After any edit to the playbook copy, diff the page against `the-solo-builders-playbook.html` sentence by sentence.
+**Why:** The document was declared complete when it was not. Part 03 shipped one of five toolkit groups, the intro had two sentences paraphrased, contractions stripped and its closing line missing. None of that is visible when reading the page, because the text that is there reads fine. It only shows up against the source. A design pass over the same content reintroduced all three of the errors the recovery notes exist to prevent, which is the same failure from the other direction.
+**Tradeoffs:** The diff needs a sentence splitter and produces false positives where headings run together, so it needs reading rather than trusting. That is still far cheaper than shipping a paraphrase of someone's own words back to them.
+
 ---
 
 ## 2026-01-01 — Example: chose Neon over local Postgres
