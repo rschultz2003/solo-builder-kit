@@ -222,8 +222,22 @@ p{margin:0 0 20px}
    and stripping the violet keyboard ring DESIGN.md requires. Suppress it
    only for pointer focus. */
 .form input[type=email]:focus:not(:focus-visible){outline:none}
+/* A disabled button was styled identically to an enabled one, so the
+   "Sending..." state looked like nothing had happened. Opacity and cursor
+   only; no colour token involved. */
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.btn[disabled]:hover{transform:none;box-shadow:var(--shadow-soft)}
+/* .form is display:flex, which beats the UA [hidden]{display:none} rule, so
+   setting form.hidden alone would not hide it. */
+.form[hidden]{display:none}
+/* The message is given tabindex="-1" purely so focus can be moved to it when
+   the form is replaced. It is never a tab stop, so the ring would only ever
+   appear as a box drawn around text that just replaced an input - which reads
+   as another input. This is not the same as stripping a ring from a focusable
+   control; that bug is fixed separately on the email field. */
+.form-msg[tabindex]:focus,.form-msg[tabindex]:focus-visible{outline:none}
 .form-msg{margin-top:16px;font-size:15px;font-weight:600;min-height:22px}
-.form-msg.ok{color:var(--peach)} .form-msg.err{color:#FF8A7C}
+.form-msg.ok{color:var(--white)} .form-msg.err{color:#FF8A7C}
 /* .62, well past the 4.5 floor: this line tells someone what happens after
    they hand over an email, which is where capture fields lose people. It
    should be comfortably readable, not merely compliant. */
@@ -561,6 +575,16 @@ var FORM_ENDPOINT = "https://app.loops.so/api/newsletter-form/cms2ksk9p0vqm0jyz1
   var valid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   function say(t, k) { msg.textContent = t; msg.className = "form-msg " + (k || ""); }
 
+  /* On success there is nothing left to fill in, so the form is replaced by
+     its confirmation. Focus moves to the message first: the submit button is
+     inside the form, and hiding it while focused would strand a keyboard user
+     on nothing. */
+  function done() {
+    msg.setAttribute("tabindex", "-1");
+    msg.focus();
+    form.hidden = true;
+  }
+
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     var email = input.value.trim();
@@ -579,7 +603,7 @@ var FORM_ENDPOINT = "https://app.loops.so/api/newsletter-form/cms2ksk9p0vqm0jyz1
       .then(function (r) { return r.json().catch(function () { return {}; }); })
       .then(function (d) {
         if (d && d.success === false) throw new Error("failed");
-        say("Sent. Check your inbox in the next minute.", "ok"); form.reset();
+        say("Sent. Check your inbox in the next minute.", "ok"); form.reset(); done();
       })
       .catch(function () { say("That did not go through. Try again, or DM me on X and I will send it manually.", "err"); })
       .finally(function () { btn.disabled = false; btn.textContent = original; });
