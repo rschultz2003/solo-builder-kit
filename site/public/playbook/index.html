@@ -319,108 +319,206 @@ footer{padding:56px 0 48px;border-top:1px solid var(--hair)}
 @media print{
   @page{ size:A4; margin:20mm 18mm 22mm 18mm; }
 
-  /* without this the coral and the gradients strip out */
+  /* without this the coral, the gradients and the dark pages strip out */
   *,*::before,*::after{
     -webkit-print-color-adjust:exact !important;
     print-color-adjust:exact !important;
   }
 
-  html,body{background:#fff !important;font-size:10.5pt;line-height:1.55}
+  html,body{background:var(--paper) !important;font-size:10.5pt;line-height:1.6;color:var(--ink)}
   body{overflow:visible !important}
 
   /* chrome that means nothing on paper */
   .nav,.progress,.acc-tools,.orb-layer,.hero-orbs,.hero,
   #get,.capture,footer,.form,.form-note,.form-msg{display:none !important}
 
-  /* the cover, print-only. It carries the running footer like every other
-     page: Chromium draws the footer in the margin box given to printToPDF,
-     which no @page rule can reach. */
   .pdf-only{display:block !important}
-  .pdf-cover{
-    break-after:page;min-height:232mm;display:flex !important;flex-direction:column;
-    justify-content:space-between;padding:0;
-  }
+  .reveal{opacity:1 !important;transform:none !important}
+  .read,.wrap{max-width:none;padding:0;margin:0}
+  /* clear the fixed rail; the two full-bleed pages set their own padding */
+  .pdf-toc,section.band > .read{padding-top:13mm}
+  .band-tint{background:none !important}
+  a{color:var(--coral-deep);text-decoration:none}
 
-  /* every accordion open, plus/minus gone, the button reading as a heading */
+  /* ── running rail ───────────────────────────────────────────────
+     position:fixed repeats on every page in Chromium, which is the only
+     mechanism that does. The folio and reubendorje.com are drawn by Chrome
+     into the margin box, which no CSS rule can reach. */
+  .pdf-rail{position:fixed;top:0;left:0;right:0;height:7mm;
+    border-bottom:1px solid var(--hair);opacity:.55;pointer-events:none}
+  .pdf-rail .rail-ticks{position:absolute;right:0;top:0;display:flex;gap:5mm}
+  .pdf-rail .tick{display:block;width:9mm;height:1.5pt;background:var(--hair)}
+
+  /* ── cover ──────────────────────────────────────────────────────
+     negative margins take the dark field out to the paper edge, since the
+     page margin box cannot be escaped any other way */
+  .pdf-cover{
+    break-after:page;
+    margin:-20mm -18mm 0;padding:26mm 18mm 22mm;
+    min-height:275mm;box-sizing:border-box;
+    background:var(--ink) !important;color:#fff;
+    display:flex !important;flex-direction:column;justify-content:space-between;
+    position:relative;overflow:hidden;
+  }
+  .pdf-cover .cover-orbs{display:block;position:absolute;top:0;right:0;width:120mm;height:95mm}
+  .pdf-cover .cover-orb{position:absolute;border-radius:50%}
+  .pdf-cover .cover-orb.a{width:86mm;height:86mm;right:-16mm;top:-20mm;
+    background:radial-gradient(circle at 34% 26%,#FF8A72 0%,#FF5A4E 52%,#E8432F 100%)}
+  .pdf-cover .cover-orb.b,.pdf-cover .cover-orb.c{display:none}
+  .pdf-cover .cover-eyebrow{font-family:var(--mono);font-size:9pt;letter-spacing:.22em;
+    text-transform:uppercase;color:rgba(255,255,255,.72);margin:0;position:relative}
+  .pdf-cover .cover-title{font-family:var(--display);font-weight:600;font-size:52pt;
+    line-height:.98;letter-spacing:-.035em;margin:0 0 12mm;color:#fff;
+    background:none;-webkit-background-clip:border-box;background-clip:border-box;
+    max-width:135mm;position:relative}
+  .pdf-cover .cover-sub{font-size:14pt;line-height:1.35;color:rgba(255,255,255,.88);
+    margin:0 0 5mm;max-width:120mm}
+  .pdf-cover .cover-tag{font-family:var(--mono);font-size:9.5pt;line-height:1.5;
+    color:rgba(255,255,255,.55);margin:0;max-width:115mm}
+  .pdf-cover .cover-foot{border-top:1px solid rgba(255,255,255,.22);padding-top:5mm;
+    display:flex;justify-content:space-between;align-items:baseline}
+  .pdf-cover .cover-by{font-family:var(--display);font-weight:600;font-size:12pt;margin:0;color:#fff}
+  .pdf-cover .cover-url{font-family:var(--mono);font-size:9.5pt;margin:0}
+  .pdf-cover .cover-url a{color:var(--coral)}
+
+  /* ── contents ───────────────────────────────────────────────────── */
+  .pdf-toc{break-after:page;padding-top:4mm}
+  .toc-eyebrow{font-family:var(--mono);font-size:9pt;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--muted);margin:0 0 3mm}
+  .toc-title{font-family:var(--display);font-weight:600;font-size:30pt;letter-spacing:-.03em;
+    margin:0 0 14mm;color:var(--ink)}
+  .toc-row{display:flex;align-items:baseline;gap:10mm;padding:5mm 0;
+    border-bottom:1px solid var(--hair)}
+  .toc-row:first-child{border-top:1px solid var(--hair)}
+  .toc-n{font-family:var(--mono);font-size:9.5pt;color:var(--coral-deep);min-width:12mm}
+  .toc-t{font-family:var(--display);font-weight:600;font-size:14pt;letter-spacing:-.02em}
+  .toc-tag{font-family:var(--display);font-weight:600;font-size:15pt;line-height:1.3;
+    letter-spacing:-.02em;margin:12mm 0 0;max-width:120mm}
+
+  /* ── part openers ───────────────────────────────────────────────
+     the existing heading block becomes the opener; the generated index
+     closes it and forces the break, so no heading is authored twice */
+  section.band{break-before:page;page-break-before:always;padding:0;background:none !important}
+  section#start{break-before:auto;page-break-before:auto}
+  .part-head{margin:0 0 6mm}
+  .part-num{font-family:var(--mono);font-size:9pt;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--coral-deep)}
+  section.band h2{font-family:var(--display);font-weight:600;font-size:34pt;line-height:1.02;
+    letter-spacing:-.035em;margin:0 0 8mm;max-width:150mm}
+  .lede{font-size:12pt;line-height:1.5;color:var(--muted);margin:0;max-width:125mm}
+
+  .part-open{break-after:page;page-break-after:always;min-height:250mm;
+    display:flex;flex-direction:column;justify-content:space-between}
+  .part-index{position:relative}
+  .pi-label{font-family:var(--mono);font-size:8.5pt;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 4mm}
+  .pi-rows{max-width:104mm;border-top:1px solid var(--hair)}
+  .pi-row{display:flex;gap:7mm;align-items:baseline;padding:3.2mm 0;
+    border-bottom:1px solid var(--hair)}
+  .pi-n{font-family:var(--mono);font-size:8.5pt;color:var(--muted);min-width:13mm;flex:none}
+  .pi-t{font-size:10.5pt;line-height:1.3}
+  .pi-row.is-key .pi-t{font-weight:600}
+  .pi-row.is-mark .pi-n::before{content:"";display:inline-block;width:4pt;height:4pt;
+    border-radius:50%;background:var(--coral)}
+  .pi-num{position:absolute;right:0;bottom:-6mm;font-family:var(--display);font-weight:600;
+    font-size:132pt;line-height:.78;letter-spacing:-.06em;color:var(--coral);opacity:.92}
+
+  /* ── principles, steps, weeks ───────────────────────────────────── */
   .acc-panel{height:auto !important;overflow:visible !important;visibility:visible !important}
   .acc-panel[inert]{display:block !important}
   .acc-sign{display:none !important}
-  .acc-btn{padding:11px 0 5px !important;cursor:auto;width:100%}
-  .acc-item{border-bottom:1px solid var(--hair)}
-  .acc-inner{padding:0 0 13px 0 !important}
+  .acc{border-top:0;margin-top:0}
+  .acc-item{border-bottom:1px solid var(--hair);padding-bottom:7mm;margin-bottom:7mm}
+  .acc-item:last-of-type{border-bottom:0}
+  .acc-btn{padding:0 !important;cursor:auto;width:100%;align-items:baseline;gap:9mm;
+    font-size:15pt;letter-spacing:-.025em}
+  .acc-i{font-family:var(--display) !important;font-weight:600;font-size:17pt !important;
+    color:var(--coral) !important;min-width:14mm;padding-top:0 !important}
+  .acc-inner{padding:3mm 0 0 23mm !important;color:var(--muted);font-size:10.5pt}
 
-  /* nothing may split */
-  h1,h2,h3,.acc-btn,.part-head{break-after:avoid;page-break-after:avoid}
-  .step,.kit-card,.week,.fig,.pull,.bigline,.daily{
+  .steps,.weeks,.daily{display:block !important}
+  .steps > * + *,.weeks > * + *{margin-top:7mm}
+  .daily > * + *{margin-top:0}
+  .step{padding:0 0 6mm;border:0 !important;border-bottom:1px solid var(--hair) !important;
+    border-radius:0 !important;background:none !important;position:relative;
+    padding-left:23mm}
+  .step-n{position:absolute;left:0;top:0;font-family:var(--display);font-weight:600;
+    font-size:17pt;color:var(--coral)}
+  .step h3{font-family:var(--display);font-weight:600;font-size:15pt;letter-spacing:-.025em;
+    margin:0 0 2.5mm}
+  .step p{color:var(--muted);margin:0}
+  /* the standout the source calls for */
+  .step.key{background:var(--ink) !important;color:#fff;border:0 !important;
+    border-radius:4mm !important;padding:9mm 10mm 9mm 10mm;overflow:hidden}
+  .step.key .step-n{position:static;display:inline-flex;align-items:center;justify-content:center;
+    width:9mm;height:9mm;border-radius:50%;background:var(--coral);color:#fff;font-size:10pt;
+    margin-bottom:4mm}
+  .step.key h3{color:#fff;font-size:17pt}
+  .step.key p{color:rgba(255,255,255,.78)}
+  .step-tag{display:inline-block;margin-top:4mm;font-family:var(--mono);font-size:8pt;
+    letter-spacing:.18em;text-transform:uppercase;background:none;color:var(--coral);padding:0}
+
+  .week{padding:0 0 6mm;border-bottom:1px solid var(--hair);position:relative;padding-left:23mm}
+  .week-n{position:absolute;left:0;top:1mm;font-family:var(--mono);font-size:8.5pt;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--coral-deep)}
+  .week h3{font-family:var(--display);font-weight:600;font-size:14pt;letter-spacing:-.02em;margin:0 0 2.5mm}
+  .week p{color:var(--muted);margin:0}
+
+  .daily{list-style:none;padding:0;margin:8mm 0 0}
+  .daily li{display:flex;gap:6mm;align-items:baseline;padding:3.5mm 0;
+    border-bottom:1px solid var(--hair);font-family:var(--display);font-weight:600;font-size:13pt}
+  .daily li::before{content:"";width:4pt;height:4pt;border-radius:50%;background:var(--coral);flex:none}
+  .bigline{font-family:var(--display);font-weight:600;font-size:20pt;line-height:1.18;
+    letter-spacing:-.03em;margin:9mm 0 0;max-width:135mm;break-before:avoid}
+
+  /* ── toolkit ─────────────────────────────────────────────────────── */
+  .kit{display:block !important}
+  .kit-card{padding:0 0 5mm;margin:0 0 5mm;border:0 !important;border-bottom:1px solid var(--hair) !important;
+    border-radius:0 !important;background:none !important;position:relative;padding-left:23mm}
+  .kit-cat{font-family:var(--display);font-weight:600;font-size:13pt;margin:0 0 3mm}
+  .kit-chips{display:flex;flex-wrap:wrap;gap:2mm}
+  .kit-chip{font-family:var(--mono);font-size:8.5pt;padding:1.6mm 3.4mm;border-radius:20mm;
+    border:1px solid var(--hair);background:none;color:var(--ink)}
+  .kit-chip.mine{background:var(--coral) !important;border-color:var(--coral);color:#fff !important}
+
+  /* ── the curve gets its own page ─────────────────────────────────── */
+  .fig{break-before:page;page-break-before:always;break-after:page;page-break-after:always;
+    border:0;padding:0;margin:0;min-height:248mm;
+    display:flex;flex-direction:column;justify-content:center}
+  .fig::before{content:"The compounding curve";display:block;font-family:var(--mono);
+    font-size:9pt;letter-spacing:.22em;text-transform:uppercase;color:var(--coral-deep);
+    margin-bottom:9mm}
+  .fig svg{width:100%;height:auto}
+
+  /* ── pull-quotes ─────────────────────────────────────────────────── */
+  .pull{font-family:var(--display);font-weight:600;font-size:19pt;line-height:1.22;
+    letter-spacing:-.03em;margin:12mm 0 0;max-width:140mm;
+    background:var(--grad-cool);-webkit-background-clip:text;background-clip:text;
+    color:transparent;break-inside:avoid;break-before:avoid}
+  .pull::before{content:"";display:block;width:16mm;height:2.5pt;background:var(--coral);
+    margin-bottom:5mm;border-radius:2pt}
+
+  /* ── close ───────────────────────────────────────────────────────── */
+  section#close{break-before:page}
+  section#close .read{margin:-20mm -18mm 0;padding:30mm 18mm 22mm;min-height:275mm;
+    box-sizing:border-box;background:var(--ink) !important;color:#fff;
+    display:flex;flex-direction:column}
+  section#close .sign{margin-top:auto}
+  section#close .eyebrow{color:var(--coral) !important}
+  section#close h2{color:#fff}
+  section#close p{color:rgba(255,255,255,.82)}
+  section#close .sign{font-family:var(--mono);font-size:9.5pt;color:rgba(255,255,255,.6)}
+  section#close .sign a{color:var(--coral)}
+  .pdf-cta{display:block !important;margin-top:8mm;font-family:var(--mono);font-size:10pt;
+    line-height:1.7;color:rgba(255,255,255,.7)}
+  .pdf-cta a{color:var(--coral);font-weight:500}
+
+  /* ── fragmentation ───────────────────────────────────────────────── */
+  h1,h2,h3,.acc-btn,.part-head,.kit-cat{break-after:avoid;page-break-after:avoid}
+  .step,.kit-card,.week,.fig,.pull,.bigline,.acc-item,.toc-row,.pi-row{
     break-inside:avoid;page-break-inside:avoid;
   }
   p,li{orphans:3;widows:3}
-
-  /* each Part starts a fresh page */
-  section.band{break-before:page;page-break-before:always;padding:0;background:none !important}
-  section#start{break-before:auto;page-break-before:auto}
-
-  .read,.wrap{max-width:none;padding:0;margin:0}
-  .band-tint{background:none !important}
-  .reveal{opacity:1 !important;transform:none !important}
-
-  /* keep links visible as links on paper */
-  a{color:var(--coral-deep);text-decoration:none}
-
-/* cover, print only. Type and colour are the page's own. */
-  .pdf-cover .cover-title{font-family:var(--display);font-weight:600;font-size:34pt;line-height:1.04;
-    letter-spacing:-.025em;margin:0 0 10mm;
-    background:var(--grad-cool);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .pdf-cover .cover-sub{font-size:14pt;line-height:1.4;color:var(--muted);margin:0 0 6mm;max-width:150mm}
-  .pdf-cover .cover-tag{font-family:var(--mono);font-size:10pt;color:var(--muted);margin:0;max-width:140mm}
-  .pdf-cover .cover-eyebrow{font-family:var(--mono);font-size:9pt;letter-spacing:.18em;
-    text-transform:uppercase;color:var(--coral-deep);margin:12mm 0 0}
-  .pdf-cover .cover-by{font-family:var(--display);font-weight:600;font-size:12pt;margin:0 0 2mm;color:var(--ink)}
-  .pdf-cover .cover-url{font-family:var(--mono);font-size:10pt;color:var(--coral-deep);margin:0}
-  .pdf-cover .cover-orbs{display:block;position:relative;height:46mm}
-  .pdf-cover .cover-orb{position:absolute;border-radius:50%}
-  .pdf-cover .cover-orb.a{width:38mm;height:38mm;right:0;top:0;
-    background:radial-gradient(circle at 32% 28%,#FF8A72 0%,#FF5A4E 46%,#D93A2E 100%)}
-  .pdf-cover .cover-orb.b{width:18mm;height:18mm;right:34mm;top:22mm;
-    background:radial-gradient(circle at 32% 28%,#A79CFF 0%,#7C6CF5 48%,#5B4AD1 100%)}
-  .pdf-cover .cover-orb.c{width:11mm;height:11mm;right:12mm;top:38mm;
-    background:radial-gradient(circle at 32% 28%,#FFD2BE 0%,#FFB39A 48%,#F08F6E 100%)}
-
-  /* Chromium does not fragment grid containers when printing, so .steps,
-     .weeks and .daily each moved to the next page whole and stranded the
-     heading above them on a near-empty page. All three are single-column
-     grids, so block flow with the gap restated as a margin lays out
-     identically and fragments properly. .kit is genuinely multi-column and
-     stays a grid. */
-  .steps,.weeks,.daily{display:block !important}
-  .steps > * + *{margin-top:10px}
-  .weeks > * + *{margin-top:14px}
-  .daily > * + *{margin-top:8px}
-
-  /* the reveal animation leaves a transform on every section, and transformed
-     boxes are monolithic to the fragmenter */
-  .reveal{opacity:1 !important;transform:none !important}
-
-
-  .pull{margin:20px 0 0;font-size:15pt;line-height:1.25;break-before:avoid;page-break-before:avoid}
-  .bigline{margin:16px 0 0;font-size:14pt;break-before:avoid;page-break-before:avoid}
-  .fig{break-before:avoid;page-break-before:avoid}
-  h3{break-before:avoid;page-break-before:avoid}
-  section.band > .read > *:last-child{margin-bottom:0}
-
-  .pdf-cta{display:block !important;margin-top:14mm;font-family:var(--mono);font-size:11pt;
-    line-height:1.7;color:var(--muted)}
-  .pdf-cta a{color:var(--coral-deep);font-weight:500}
-
-  .steps{gap:10px}
-  .step{padding:14px 16px;border-radius:10px}
-  .kit{gap:10px}
-  .kit-card{padding:14px 16px;border-radius:10px}
-  .fig{padding:14px 0 16px}
-  /* the curve is the tallest single component in the book; on screen it gets a
-     full-width block, on paper that alone was pushing Part 01's pull-quote to
-     a page of its own */
-  .fig svg{max-height:66mm;width:auto;margin:0 auto}
 }
 
 @media (prefers-reduced-motion:reduce){
@@ -1006,6 +1104,150 @@ var FORM_ENDPOINT = "https://app.loops.so/api/newsletter-form/cms2ksk9p0vqm0jyz1
       .finally(function () { btn.disabled = false; btn.textContent = original; });
   });
 })();
+
+/* ---- print scaffold -------------------------------------------------
+   The PDF's contents page and part-opener indexes are built from the DOM
+   at print time rather than authored, so no heading exists twice and
+   nothing can drift out of sync with the page. Wired to beforeprint so a
+   browser Ctrl+P produces the same document og/render-pdf.mjs does.
+   Screen rendering is untouched: everything built here is .pdf-only,
+   which is display:none outside @media print. */
+(function () {
+  var SEL = ".acc-item, .step, .week, .kit-card, .fig, .daily";
+
+  function txt(el) { return el ? el.textContent.replace(/\s+/g, " ").trim() : ""; }
+  function pad(n) { return n < 10 ? "0" + n : String(n); }
+
+  function partSections() {
+    return [].slice.call(document.querySelectorAll("section.band"))
+      .filter(function (s) { return s.querySelector(".part-num"); });
+  }
+
+  /* document order matters: the compounding curve has to appear between
+     principles 03 and 04, exactly where it sits in the flow */
+  function itemsIn(sec) {
+    var kit = 0;
+    return [].slice.call(sec.querySelectorAll(SEL)).map(function (el) {
+      if (el.classList.contains("acc-item")) {
+        var sp = el.querySelectorAll(".acc-btn span");
+        return { n: txt(sp[0]), t: txt(sp[1]) };
+      }
+      if (el.classList.contains("step")) {
+        return { n: txt(el.querySelector(".step-n")), t: txt(el.querySelector("h3")),
+                 key: el.classList.contains("key") };
+      }
+      if (el.classList.contains("week")) {
+        return { n: txt(el.querySelector(".week-n")), t: txt(el.querySelector("h3")) };
+      }
+      if (el.classList.contains("kit-card")) {
+        return { n: pad(++kit), t: txt(el.querySelector(".kit-cat")) };
+      }
+      if (el.classList.contains("daily")) return { n: "Daily", t: "Every day from now on" };
+      return { n: "", t: "The compounding curve", mark: true };   // .fig
+    });
+  }
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  function build() {
+    /* The opener wrapper borrows real headings out of the section. Give them
+       back before clearing, or a second run (the renderer calls build, then
+       printToPDF fires beforeprint and calls it again) deletes page content. */
+    [].slice.call(document.querySelectorAll(".part-open")).forEach(function (w) {
+      var top = w.querySelector(".po-top");
+      if (top) while (top.firstChild) w.parentNode.insertBefore(top.firstChild, w);
+      w.remove();
+    });
+    [].slice.call(document.querySelectorAll(".pdf-gen")).forEach(function (n) { n.remove(); });
+
+    /* running rail, fixed so it repeats on every page. The folio and
+       reubendorje.com are drawn by Chrome into the margin box instead,
+       which CSS cannot reach. */
+    var rail = el("div", "pdf-only pdf-gen pdf-rail");
+    var ticks = el("div", "rail-ticks");
+    for (var i = 0; i < 5; i++) ticks.appendChild(el("span", "tick"));
+    rail.appendChild(ticks);
+    document.body.appendChild(rail);
+
+    var secs = partSections();
+
+    /* contents */
+    var toc = el("section", "pdf-only pdf-gen pdf-toc");
+    toc.appendChild(el("p", "toc-eyebrow", "Contents"));
+    toc.appendChild(el("h2", "toc-title", "What is in here"));
+    var list = el("div", "toc-list");
+    var start = document.querySelector("#start");
+    if (start) {
+      var r0 = el("div", "toc-row");
+      r0.appendChild(el("span", "toc-n", "00"));
+      r0.appendChild(el("span", "toc-t", txt(start.querySelector("h2"))));
+      list.appendChild(r0);
+    }
+    secs.forEach(function (sec) {
+      var row = el("div", "toc-row");
+      row.appendChild(el("span", "toc-n", txt(sec.querySelector(".part-num")).replace(/PART\s*/i, "")));
+      row.appendChild(el("span", "toc-t", txt(sec.querySelector("h2"))));
+      list.appendChild(row);
+    });
+    var close = document.querySelector("#close");
+    if (close) {
+      var rc = el("div", "toc-row");
+      rc.appendChild(el("span", "toc-n", "—"));
+      rc.appendChild(el("span", "toc-t", txt(close.querySelector("h2"))));
+      list.appendChild(rc);
+    }
+    toc.appendChild(list);
+    toc.appendChild(el("p", "toc-tag",
+      "everything i wish someone handed me before i wasted years figuring it out."));
+
+    var cover = document.querySelector(".pdf-cover");
+    if (cover && cover.parentNode) cover.parentNode.insertBefore(toc, cover.nextSibling);
+
+    /* part-opener index, one per part */
+    secs.forEach(function (sec, i) {
+      var idx = el("div", "pdf-only pdf-gen part-index");
+      idx.appendChild(el("p", "pi-label", "In this part"));
+      var rows = el("div", "pi-rows");
+      itemsIn(sec).forEach(function (it) {
+        var row = el("div", "pi-row" + (it.key ? " is-key" : "") + (it.mark ? " is-mark" : ""));
+        row.appendChild(el("span", "pi-n", it.n));
+        row.appendChild(el("span", "pi-t", it.t));
+        rows.appendChild(row);
+      });
+      idx.appendChild(rows);
+      idx.appendChild(el("span", "pi-num", pad(i + 1)));
+      var lede = sec.querySelector(".lede");
+      if (!lede || !lede.parentNode) return;
+      var open = el("div", "pdf-gen part-open");
+      var head = sec.querySelector(".part-head");
+      lede.parentNode.insertBefore(open, head || lede);
+      var top = el("div", "po-top");
+      [head, sec.querySelector("h2"), lede].forEach(function (n) { if (n) top.appendChild(n); });
+      open.appendChild(top);
+      open.appendChild(idx);
+    });
+  }
+
+  function teardown() {
+    [].slice.call(document.querySelectorAll(".part-open")).forEach(function (w) {
+      var top = w.querySelector(".po-top");
+      if (top) while (top.firstChild) w.parentNode.insertBefore(top.firstChild, w);
+      w.remove();
+    });
+    [].slice.call(document.querySelectorAll(".pdf-gen")).forEach(function (n) { n.remove(); });
+  }
+
+  window.buildPrintScaffold = build;
+  window.addEventListener("beforeprint", build);
+  /* a browser Ctrl+P would otherwise leave the scaffold in the live DOM */
+  window.addEventListener("afterprint", teardown);
+})();
+
 </script>
 </body>
 </html>

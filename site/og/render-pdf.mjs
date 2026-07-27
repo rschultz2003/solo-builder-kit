@@ -91,6 +91,7 @@ await call("Runtime.evaluate", {
     document.querySelectorAll('.acc-panel').forEach(p => { p.inert = false; p.style.height = 'auto'; });
     document.querySelectorAll('.acc-btn').forEach(b => b.setAttribute('aria-expanded','true'));
     document.querySelectorAll('.reveal').forEach(e => e.classList.add('in'));
+    if (window.buildPrintScaffold) window.buildPrintScaffold();
     document.fonts ? document.fonts.ready.then(()=>1) : 1;
   `,
   awaitPromise: true,
