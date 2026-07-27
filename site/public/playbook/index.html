@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Solo Builder&rsquo;s Playbook — Reuben Dorje</title>
+<meta name="description" content="A field guide for solo builders. How to start a business, build with AI, and actually follow through. Free, by Reuben Dorje.">
+<link rel="canonical" href="https://reubendorje.com/playbook">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://reubendorje.com/playbook">
+<meta property="og:title" content="The Solo Builder&rsquo;s Playbook">
+<meta property="og:description" content="Everything I wish someone handed me before I wasted years figuring it out. Free.">
+<meta property="og:image" content="https://reubendorje.com/og-playbook.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@reubendorje">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+<!-- Orb physics. Shared byte-for-byte with / so the two cannot drift. -->
+<script src="/orbs.js" defer></script>
+
+<style>
+/* ============================================================
+   TOKENS  —  Soft 3D system, coral anchored
+   ============================================================ */
+:root{
+  --paper:#FBFAF9;
+  --paper-tint:#FFF6F4;
+  --white:#FFFFFF;
+  --ink:#16130F;
+  --muted:#6E6860;
+  --hair:#EAE4DD;
+  --coral:#FF5A4E;
+  --coral-deep:#C8341F;
+  --peach:#FFB39A;
+  --violet:#7C6CF5;
+
+  --grad-warm:linear-gradient(135deg,var(--coral) 0%,var(--peach) 100%);
+  --grad-cool:linear-gradient(135deg,var(--coral) 0%,var(--violet) 100%);
+
+  --display:'Sora',system-ui,sans-serif;
+  --body:'Plus Jakarta Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+
+  --shadow-soft:0 18px 50px -22px rgba(255,90,78,.30), 0 4px 14px -6px rgba(22,19,15,.06);
+  --shadow-lift:0 30px 70px -26px rgba(255,90,78,.42), 0 8px 22px -10px rgba(22,19,15,.10);
+
+  --wrap:1120px;
+  --read:720px;
+  --r:18px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);
+  font-size:17.5px;line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--violet);outline-offset:3px;border-radius:6px}
+.wrap{width:100%;max-width:var(--wrap);margin:0 auto;padding:0 24px}
+.read{width:100%;max-width:var(--read);margin:0 auto;padding:0 24px}
+.eyebrow{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--coral-deep);margin:0 0 18px}
+h1,h2,h3{font-family:var(--display);font-weight:600;letter-spacing:-.025em;line-height:1.1;margin:0}
+h2{font-size:clamp(28px,4vw,44px)}
+h3{font-size:19.5px;letter-spacing:-.015em;line-height:1.3}
+p{margin:0 0 20px}
+.lede{font-size:clamp(17px,2vw,20.5px);color:var(--muted)}
+
+/* ---- progress + nav ---- */
+/* scaleX, not width: width animates layout every scroll frame. The .1s
+   transition is gone too, because it interpolated toward a target the
+   rAF loop was already rewriting each frame. */
+.progress{position:fixed;top:0;left:0;height:3px;width:100%;background:var(--grad-cool);z-index:80;
+  transform:scaleX(0);transform-origin:0 50%}
+.nav{position:sticky;top:0;z-index:60;backdrop-filter:saturate(180%) blur(14px);
+  background:rgba(251,250,249,.82);border-bottom:1px solid transparent;transition:border-color .3s}
+.nav.stuck{border-bottom-color:var(--hair)}
+.nav-in{display:flex;align-items:center;gap:20px;height:70px}
+.mark{display:flex;align-items:center;gap:11px;text-decoration:none;font-family:var(--display);
+  font-weight:600;letter-spacing:-.02em;font-size:15.5px}
+.mark-orb{width:22px;height:22px;border-radius:50%;background:var(--grad-warm);
+  box-shadow:inset -3px -4px 8px rgba(160,40,25,.45), inset 3px 4px 8px rgba(255,255,255,.55)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:18px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;font-family:var(--body);
+  font-size:15px;font-weight:600;padding:13px 24px;border-radius:999px;border:0;cursor:pointer;
+  text-decoration:none;transition:transform .18s ease, box-shadow .18s ease}
+/* --coral-deep, not --coral: white on --coral is 3.08:1 and fails AA for
+   button text at these sizes. --coral-deep takes it to 5.29:1. */
+.btn-primary{background:var(--coral-deep);color:#fff;box-shadow:var(--shadow-soft)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
+.btn-ghost{background:var(--white);color:var(--ink);border:1px solid var(--hair)}
+.btn-ghost:hover{transform:translateY(-2px);border-color:var(--coral);color:var(--coral-deep)}
+.btn-sm{padding:10px 19px;font-size:14px}
+
+/* ---- orbs ---- */
+.orb{position:absolute;border-radius:50%;pointer-events:none}
+.orb::after{content:"";position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at 30% 24%,rgba(255,255,255,.92) 0%,rgba(255,255,255,.34) 16%,rgba(255,255,255,0) 44%)}
+.orb-a{background:radial-gradient(circle at 32% 28%,#FF8A72 0%,#FF5A4E 46%,#D93A2E 100%)}
+.orb-b{background:radial-gradient(circle at 32% 28%,#FFD2BE 0%,#FFB39A 48%,#F08F6E 100%)}
+.orb-c{background:radial-gradient(circle at 32% 28%,#A79CFF 0%,#7C6CF5 48%,#5B4AD1 100%)}
+/* ORB LAYER — keep identical on both pages. Behaviour lives in /orbs.js.
+   The authored .orb elements become invisible layout anchors; the live
+   orbs are cloned into one fixed, full-viewport layer so they can travel
+   past section edges. The layer never swallows a click; each orb does. */
+.orb-layer{position:fixed;inset:0;z-index:5;pointer-events:none}
+/* Touch: the layer lives inside .hero instead, so the compositor moves it
+   with the page and scroll never reaches JS. .hero's own overflow:hidden
+   does the containment, so no clip-path and no parallax here. */
+.orb-layer-flow{position:absolute;z-index:auto;clip-path:none!important}
+.orb-anchor{visibility:hidden}
+.orb-live{
+  position:absolute;left:0;top:0;pointer-events:none;touch-action:none;
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;
+}
+/* The carrier above takes the physics transform; the skin below takes
+   the paint and the float. Separate elements, so each property still
+   has exactly one author, and the compositor can run the float without
+   waking the rAF loop, which is what lets orbs sleep while still
+   drifting. */
+.orb-skin{position:absolute;inset:0;border-radius:50%}
+/* An orb only takes the pointer once /orbs.js has confirmed the spot
+   underneath is inert, so a link, button or line of text under an orb
+   always wins. */
+.orb-live.hot{pointer-events:auto;cursor:grab}
+.orb-live.grabbed{pointer-events:auto;cursor:grabbing}
+@keyframes float{
+  0%,100%{transform:translate3d(0,0,0)}
+  50%{transform:translate3d(0,-16px,0)}
+}
+.floaty{animation:float 7s ease-in-out infinite}
+.floaty.slow{animation-duration:10s}
+.floaty.fast{animation-duration:5.5s}
+
+/* ---- hero ---- */
+.hero{position:relative;padding:80px 0 84px;overflow:hidden;text-align:center}
+.hero-orbs{position:absolute;inset:0;pointer-events:none}
+#p1{width:250px;height:250px;top:-60px;right:-50px}
+#p2{width:120px;height:120px;top:240px;right:150px}
+#p3{width:170px;height:170px;bottom:-70px;left:-60px;opacity:.6}
+.hero-in{position:relative;z-index:2}
+.hero h1{font-size:clamp(38px,6.2vw,68px);margin:0 auto 22px;max-width:14ch}
+.hero h1 .grad{background:var(--grad-cool);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .lede{max-width:52ch;margin:0 auto 18px}
+.tagline{font-family:var(--mono);font-size:13.5px;color:var(--muted);max-width:48ch;margin:0 auto 32px}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+
+/* ---- body sections ---- */
+.band{padding:72px 0;position:relative}
+.band-tint{background:var(--paper-tint)}
+.pull{
+  font-family:var(--display);font-weight:600;font-size:clamp(24px,3.4vw,34px);
+  line-height:1.28;letter-spacing:-.025em;margin:44px 0;
+  background:var(--grad-cool);-webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.part-head{display:flex;align-items:baseline;gap:16px;margin-bottom:14px}
+.part-num{font-family:var(--mono);font-size:13px;letter-spacing:.16em;color:var(--coral-deep)}
+
+/* ---- accordions ---- */
+/* quiet text control: it must not compete with "Get the PDF" */
+.acc-tools{display:flex;justify-content:flex-end;margin-top:30px;margin-bottom:-16px}
+.acc-all{
+  background:none;border:0;padding:6px 2px;cursor:pointer;
+  font-family:var(--mono);font-size:11.5px;font-weight:500;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  transition:color .2s;
+}
+.acc-all:hover{color:var(--coral-deep)}
+.acc{border-top:1px solid var(--hair);margin-top:34px}
+.acc-item{border-bottom:1px solid var(--hair)}
+.acc-btn{
+  width:100%;background:none;border:0;cursor:pointer;text-align:left;
+  display:flex;align-items:flex-start;gap:16px;padding:24px 4px;
+  font-family:var(--display);font-weight:600;font-size:19px;letter-spacing:-.015em;
+  line-height:1.35;color:var(--ink);transition:color .2s, padding-left .25s ease;
+}
+.acc-btn:hover{color:var(--coral-deep);padding-left:12px}
+.acc-i{font-family:var(--mono);font-weight:500;font-size:13px;color:var(--muted);
+  padding-top:6px;flex:none;min-width:24px}
+.acc-sign{margin-left:auto;flex:none;width:22px;height:22px;position:relative;margin-top:5px}
+.acc-sign::before,.acc-sign::after{content:"";position:absolute;background:var(--coral);
+  border-radius:2px;transition:transform .3s cubic-bezier(.2,.7,.3,1)}
+.acc-sign::before{top:10px;left:2px;width:18px;height:2px}
+.acc-sign::after{left:10px;top:2px;width:2px;height:18px}
+.acc-btn[aria-expanded="true"] .acc-sign::after{transform:rotate(90deg)}
+.acc-panel{overflow:hidden;height:0;transition:height .38s cubic-bezier(.2,.7,.3,1)}
+.acc-inner{padding:0 4px 28px 56px;color:var(--muted);font-size:16.5px}
+.acc-inner p:last-child{margin-bottom:0}
+
+/* ---- placeholder blocks (delete once real content lands) ---- */
+.todo{
+  border:1px dashed var(--peach);background:#FFF3EF;border-radius:14px;
+  padding:22px 24px;margin:34px 0;color:var(--coral-deep);font-size:15.5px;
+}
+.todo strong{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  display:block;margin-bottom:8px}
+.todo p{margin:0;color:var(--muted)}
+
+/* ---- capture ---- */
+.capture{position:relative;overflow:hidden;background:var(--ink);color:#fff;
+  border-radius:28px;padding:60px 46px}
+.capture h2{color:#fff;max-width:16ch}
+.capture .lede{color:rgba(255,255,255,.66);margin-top:16px}
+.capture-orbs{position:absolute;inset:0;pointer-events:none}
+#k1{width:240px;height:240px;top:-80px;right:-50px}
+.capture-in{position:relative;z-index:2;max-width:540px}
+.form{display:flex;gap:10px;margin-top:28px;flex-wrap:wrap}
+.form input[type=email]{flex:1 1 250px;min-width:0;background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.18);color:#fff;font-family:var(--body);font-size:16px;
+  padding:15px 20px;border-radius:999px}
+/* .48 not higher: a high-contrast placeholder starts reading as a filled
+   value and people skip the field. ~4.87:1 on --ink. */
+.form input[type=email]::placeholder{color:rgba(255,255,255,.48)}
+.form input[type=email]:focus{border-color:var(--coral);background:rgba(255,255,255,.12)}
+/* outline:none on plain :focus (0,2,1) was beating :focus-visible (0,1,0)
+   and stripping the violet keyboard ring DESIGN.md requires. Suppress it
+   only for pointer focus. */
+.form input[type=email]:focus:not(:focus-visible){outline:none}
+/* A disabled button was styled identically to an enabled one, so the
+   "Sending..." state looked like nothing had happened. Opacity and cursor
+   only; no colour token involved. */
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.btn[disabled]:hover{transform:none;box-shadow:var(--shadow-soft)}
+/* .form is display:flex, which beats the UA [hidden]{display:none} rule, so
+   setting form.hidden alone would not hide it. */
+.form[hidden]{display:none}
+/* The message is given tabindex="-1" purely so focus can be moved to it when
+   the form is replaced. It is never a tab stop, so the ring would only ever
+   appear as a box drawn around text that just replaced an input - which reads
+   as another input. This is not the same as stripping a ring from a focusable
+   control; that bug is fixed separately on the email field. */
+.form-msg[tabindex]:focus,.form-msg[tabindex]:focus-visible{outline:none}
+.form-msg{margin-top:16px;font-size:15px;font-weight:600;min-height:22px}
+.form-msg.ok{color:var(--white)} .form-msg.err{color:#FF8A7C}
+/* .62, well past the 4.5 floor: this line tells someone what happens after
+   they hand over an email, which is where capture fields lose people. It
+   should be comfortably readable, not merely compliant. */
+.form-note{font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.62);margin-top:14px}
+
+footer{padding:56px 0 48px;border-top:1px solid var(--hair)}
+.foot-in{display:flex;flex-wrap:wrap;gap:20px;align-items:center}
+.foot-links{margin-left:auto;display:flex;gap:20px;flex-wrap:wrap}
+.foot-links a{font-size:14.5px;color:var(--muted);text-decoration:none}
+.foot-links a:hover{color:var(--coral-deep)}
+
+.reveal{opacity:0;transform:translateY(20px);
+  transition:opacity .7s cubic-bezier(.2,.7,.3,1), transform .7s cubic-bezier(.2,.7,.3,1)}
+.reveal.in{opacity:1;transform:none}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *{animation:none!important;transition-duration:.001ms!important}
+  .reveal{opacity:1;transform:none}
+}
+@media (max-width:860px){
+  #p2{display:none} #p1{width:170px;height:170px;top:-40px;right:-60px}
+  .band{padding:56px 0}
+  .capture{padding:42px 24px;border-radius:22px}
+  .acc-inner{padding-left:4px}
+  .nav-right .btn{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress" aria-hidden="true"></div>
+
+<nav class="nav" id="nav">
+  <div class="wrap nav-in">
+    <a class="mark" href="/"><span class="mark-orb"></span>reuben dorje</a>
+    <div class="nav-right">
+      <a class="btn btn-primary btn-sm" href="#get">Get the PDF</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<header class="hero">
+  <div class="hero-orbs" aria-hidden="true">
+    <div class="orb orb-a" id="p1" data-depth="0.16"></div>
+    <div class="orb orb-c" id="p2" data-float="fast" data-depth="0.3"></div>
+    <div class="orb orb-b" id="p3" data-float="slow" data-depth="0.1"></div>
+  </div>
+  <div class="read hero-in">
+    <p class="eyebrow">a field guide for solo builders</p>
+    <h1>The Solo Builder&rsquo;s <span class="grad">Playbook</span></h1>
+    <p class="lede">How to start a business, build with AI, and actually follow through.</p>
+    <p class="tagline">everything i wish someone handed me before i wasted years figuring it out.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="#start">Start reading</a>
+      <a class="btn btn-ghost" href="#get">Get the PDF</a>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════ INTRO ═══════════════════ -->
+<section class="band" id="start">
+  <div class="read reveal">
+    <p class="eyebrow">read this first</p>
+    <h2>Start here</h2>
+    <p style="margin-top:24px">I spent years chasing my tail. Close to 20 different businesses before any of it actually worked, and most of them failed. Not because the ideas were bad, but because I kept quitting right before they would have turned, and because I had no real idea what I was doing.</p>
+    <p>This is the guide I wish someone had handed me at the start. No fluff, no theory, no motivational filler. Just what actually moved the needle once I worked it out the hard way.</p>
+    <p>It is for anyone who wants to build something of their own: start a business, build an app, get your health and your head right, and actually follow through this time. You do not need a degree, funding, a team or anyone&rsquo;s permission. You need a bit of direction and the willingness to stick around longer than everyone else.</p>
+    <p class="pull">you dont need permission. you need direction, and the willingness to outlast everyone else.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════ PART 01 ═══════════════════ -->
+<section class="band band-tint">
+  <div class="read reveal">
+    <div class="part-head">
+      <span class="part-num">PART 01</span>
+    </div>
+    <h2>The foundation</h2>
+    <p class="lede" style="margin-top:20px">Most mindset content is useless. These five are not motivation. They are the mental models that decide whether you make it or quit.</p>
+
+    <div class="acc-tools">
+      <button class="acc-all" id="accAll" type="button" aria-controls="acc">Expand all</button>
+    </div>
+
+    <div class="acc" id="acc">
+
+      <div class="acc-item">
+        <button class="acc-btn" aria-expanded="false">
+          <span class="acc-i">01</span>
+          <span>There is no such thing as &ldquo;your thing.&rdquo;</span>
+          <span class="acc-sign" aria-hidden="true"></span>
+        </button>
+        <div class="acc-panel"><div class="acc-inner">
+          <p>People waste years searching for the perfect idea or some hidden talent. It does not exist. The search is just a socially acceptable way to keep quitting.</p>
+          <p>Almost any decent idea works if you stay long enough. The winners are not the ones who found their thing. They are the ones who stopped looking and went deep on one.</p>
+        </div></div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-btn" aria-expanded="false">
+          <span class="acc-i">02</span>
+          <span>The boring middle is where the money is.</span>
+          <span class="acc-sign" aria-hidden="true"></span>
+        </button>
+        <div class="acc-panel"><div class="acc-inner">
+          <p>Every project is exciting for a few months, then it gets hard and boring. Most people read that as a sign they picked wrong and jump. They are wrong.</p>
+          <p>The boring middle is not a signal to leave. It is the filter. Almost everyone leaves at the same point, which is exactly why the reward sits on the other side of it.</p>
+        </div></div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-btn" aria-expanded="false">
+          <span class="acc-i">03</span>
+          <span>Principle three</span>
+          <span class="acc-sign" aria-hidden="true"></span>
+        </button>
+        <div class="acc-panel"><div class="acc-inner">
+          <p>Paste the real title and body for principle three here.</p>
+        </div></div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-btn" aria-expanded="false">
+          <span class="acc-i">04</span>
+          <span>Principle four</span>
+          <span class="acc-sign" aria-hidden="true"></span>
+        </button>
+        <div class="acc-panel"><div class="acc-inner">
+          <p>Paste the real title and body for principle four here.</p>
+        </div></div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-btn" aria-expanded="false">
+          <span class="acc-i">05</span>
+          <span>Principle five</span>
+          <span class="acc-sign" aria-hidden="true"></span>
+        </button>
+        <div class="acc-panel"><div class="acc-inner">
+          <p>Paste the real title and body for principle five here.</p>
+        </div></div>
+      </div>
+
+    </div>
+
+    <div class="todo">
+      <strong>Content gap</strong>
+      <p>Principles 3 to 5, and Parts 02 onward (build with AI, the toolkit, the 30 day plan), are not in this file. Paste them from the playbook source before this goes live, then delete this block. Structure and styling are done, so it is copy in, nothing else.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ CAPTURE ═══════════════════ -->
+<section class="band" id="get">
+  <div class="wrap">
+    <div class="capture reveal">
+      <div class="capture-orbs" aria-hidden="true"><div class="orb orb-a floaty" id="k1"></div></div>
+      <div class="capture-in">
+        <p class="eyebrow" style="color:var(--peach)">Keep it</p>
+        <h2>Take the whole thing with you.</h2>
+        <p class="lede">The PDF version, plus every new drop the day it goes up.</p>
+        <form class="form" id="capture" novalidate>
+          <label for="email" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Email address</label>
+          <input type="email" id="email" name="email" placeholder="you@email.com" required autocomplete="email">
+          <button class="btn btn-primary" type="submit" id="submitBtn">Send me the PDF</button>
+        </form>
+        <p class="form-msg" id="formMsg" role="status" aria-live="polite"></p>
+        <p class="form-note">no spam, no drip funnel, unsubscribe in one click.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-in">
+    <a class="mark" href="/"><span class="mark-orb"></span>reuben dorje</a>
+    <div class="foot-links">
+      <a href="/">Home</a>
+      <a href="/#library">Free stuff</a>
+      <a href="https://x.com/reubendorje" target="_blank" rel="me noopener">@reubendorje</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* Keep this value identical to the one on / — see DESIGN.md */
+var FORM_ENDPOINT = "https://app.loops.so/api/newsletter-form/cms2ksk9p0vqm0jyz1mxrtqmf";
+
+(function () {
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var nav = document.getElementById("nav");
+  var bar = document.getElementById("progress");
+
+  /* ---- accordions (height-animated, keyboard + a11y correct) ----
+     The previous version attached a one-shot transitionend listener on
+     open that latched height to "auto". Closing mid-open left that
+     listener attached, so the CLOSING transition fired it and snapped
+     the panel fully open while aria-expanded said "false". Rapid
+     clicking desynced the two permanently.
+
+     Now: any pending latch is dropped at the start of every toggle, the
+     handler filters on target and propertyName, and it re-checks
+     aria-expanded before latching, so a stale event can never open a
+     panel that is meant to be closed.
+
+     Collapsed panels are `inert`, which takes their contents out of both
+     the tab order and the accessibility tree without touching layout, so
+     the height animation is unaffected. inert rather than display:none
+     or visibility:hidden: those suppress rendering, which also takes the
+     text away from find-in-page. */
+  var accs = [].map.call(document.querySelectorAll(".acc-btn"), function (btn) {
+    var rec = { btn: btn, panel: btn.nextElementSibling };
+    rec.inner = rec.panel.firstElementChild;
+    rec.settle = function (e) {
+      if (e && (e.target !== rec.panel || e.propertyName !== "height")) return;
+      rec.panel.removeEventListener("transitionend", rec.settle);
+      if (rec.btn.getAttribute("aria-expanded") === "true") {
+        rec.panel.style.height = "auto";   /* so it reflows with the viewport */
+      } else {
+        rec.panel.inert = true;            /* only once it is fully closed */
+      }
+    };
+    if (btn.getAttribute("aria-expanded") !== "true") rec.panel.inert = true;
+    return rec;
+  });
+
+  function isOpen(rec) { return rec.btn.getAttribute("aria-expanded") === "true"; }
+
+  /* animate === false snaps, which is what the bulk control uses: nineteen
+     simultaneous height transitions jank badly. Normal animated behaviour
+     resumes for individual toggles straight afterwards. */
+  function setPanel(rec, open, animate) {
+    var panel = rec.panel;
+    rec.btn.setAttribute("aria-expanded", open ? "true" : "false");
+    panel.removeEventListener("transitionend", rec.settle);
+
+    if (open) panel.inert = false;         /* clear before it becomes reachable */
+
+    if (!animate || reduced) {
+      panel.style.transition = "none";
+      panel.style.height = open ? "auto" : "0px";
+      void panel.offsetHeight;             /* commit with the transition off */
+      panel.style.transition = "";
+      if (!open) panel.inert = true;
+      return;
+    }
+
+    panel.style.height = panel.getBoundingClientRect().height + "px";  /* pin where it is now */
+    void panel.offsetHeight;                                           /* flush before retarget */
+    panel.addEventListener("transitionend", rec.settle);
+    requestAnimationFrame(function () {
+      panel.style.height = open ? rec.inner.offsetHeight + "px" : "0px";
+    });
+  }
+
+  accs.forEach(function (rec) {
+    rec.btn.addEventListener("click", function () { setPanel(rec, !isOpen(rec), true); });
+  });
+
+  /* ---- expand all ----
+     Long-form guide behind nineteen disclosures is hostile to a screen
+     reader user and breaks Ctrl+F across the whole document. This is the
+     escape hatch, and it is a good affordance for a long read regardless. */
+  var accAll = document.getElementById("accAll");
+  if (accAll && accs.length) {
+    accAll.addEventListener("click", function () {
+      var openAll = !accs.every(isOpen);
+      accs.forEach(function (rec) { setPanel(rec, openAll, false); });
+      accAll.textContent = openAll ? "Collapse all" : "Expand all";
+    });
+    /* keep the label honest when panels are toggled individually */
+    accs.forEach(function (rec) {
+      rec.btn.addEventListener("click", function () {
+        accAll.textContent = accs.every(isOpen) ? "Collapse all" : "Expand all";
+      });
+    });
+  }
+
+  /* ---- reveal ---- */
+  var items = document.querySelectorAll(".reveal");
+  if (reduced || !("IntersectionObserver" in window)) {
+    items.forEach(function (el) { el.classList.add("in"); });
+  } else {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+      });
+    }, { rootMargin: "0px 0px -10% 0px", threshold: 0.05 });
+    items.forEach(function (el) { io.observe(el); });
+  }
+
+  /* ---- scroll: progress + nav.
+         Orb transforms are owned exclusively by /orbs.js. ---- */
+  var ticking = false;
+  var maxScroll = 0;
+
+  /* documentElement.scrollHeight was read inside the rAF frame, forcing
+     a layout on every scroll frame. It is cached here instead, and
+     refreshed on the two things that actually change it: viewport size
+     and content height (an accordion opening). */
+  function remeasure() {
+    maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    if (!ticking) { ticking = true; requestAnimationFrame(frame); }
+  }
+
+  function frame() {
+    var y = window.scrollY;
+    var p = maxScroll > 0 ? y / maxScroll : 0;
+    bar.style.transform = "scaleX(" + (p < 0 ? 0 : p > 1 ? 1 : p) + ")";
+    nav.classList.toggle("stuck", y > 8);
+    ticking = false;
+  }
+  window.addEventListener("scroll", function () {
+    if (!ticking) { ticking = true; requestAnimationFrame(frame); }
+  }, { passive: true });
+
+  var resizeTimer = 0;
+  window.addEventListener("resize", function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(remeasure, 120);
+  }, { passive: true });
+
+  if ("ResizeObserver" in window) {
+    new ResizeObserver(remeasure).observe(document.documentElement);
+  }
+  remeasure();
+
+  /* ---- capture ---- */
+  var form = document.getElementById("capture");
+  var input = document.getElementById("email");
+  var btn = document.getElementById("submitBtn");
+  var msg = document.getElementById("formMsg");
+  var valid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  function say(t, k) { msg.textContent = t; msg.className = "form-msg " + (k || ""); }
+
+  /* On success there is nothing left to fill in, so the form is replaced by
+     its confirmation. Focus moves to the message first: the submit button is
+     inside the form, and hiding it while focused would strand a keyboard user
+     on nothing. */
+  function done() {
+    msg.setAttribute("tabindex", "-1");
+    msg.focus();
+    form.hidden = true;
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var email = input.value.trim();
+    if (!valid.test(email)) { say("That email does not look right. Check it and try again.", "err"); input.focus(); return; }
+    if (!FORM_ENDPOINT) { say("Form endpoint is not connected yet. Set FORM_ENDPOINT before going live.", "err"); return; }
+    btn.disabled = true; var original = btn.textContent; btn.textContent = "Sending...";
+    var body = new URLSearchParams();
+    body.append("email", email);
+    body.append("userGroup", "playbook");
+    body.append("source", "reubendorje.com/playbook");
+    fetch(FORM_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: body.toString()
+    })
+      .then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (d) {
+        if (d && d.success === false) throw new Error("failed");
+        say("Sent. Check your inbox in the next minute.", "ok"); form.reset(); done();
+      })
+      .catch(function () { say("That did not go through. Try again, or DM me on X and I will send it manually.", "err"); })
+      .finally(function () { btn.disabled = false; btn.textContent = original; });
+  });
+})();
+</script>
+</body>
+</html>
