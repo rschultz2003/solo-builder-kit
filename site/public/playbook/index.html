@@ -193,6 +193,62 @@ p{margin:0 0 20px}
 .acc-inner{padding:0 4px 28px 56px;color:var(--muted);font-size:16.5px}
 .acc-inner p:last-child{margin-bottom:0}
 
+/* ---- long-form components ----------------------------------------
+   All colour comes from existing tokens. The recovered source named a
+   hairline #E7E2DB and a grey line #A8A199; --hair is within a shade of
+   the first, and the second is --muted held back with opacity, so no new
+   colour enters the palette. */
+.fig{margin:0;border-bottom:1px solid var(--hair);padding:30px 0 34px}
+.fig svg{width:100%;height:auto;display:block}
+.fig-cap{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--muted);margin:16px 0 0}
+
+/* numbered blocks: the build workflow, and the body principles */
+.steps{display:grid;gap:14px;margin-top:34px}
+.step{border:1px solid var(--hair);border-radius:var(--r);background:var(--white);padding:22px 24px}
+.step-n{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--muted);display:block;margin-bottom:10px}
+.step h3{margin:0 0 8px}
+.step p{margin:0;color:var(--muted);font-size:16.5px}
+/* step 04 is the standout: --coral-deep so the white text clears AA */
+.step.key{background:var(--coral-deep);border-color:transparent;box-shadow:var(--shadow-lift)}
+.step.key h3{color:#fff}
+.step.key .step-n{color:rgba(255,255,255,.92)}
+.step.key p{color:rgba(255,255,255,.95)}
+.step-tag{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.16em;text-transform:uppercase;background:var(--white);
+  color:var(--coral-deep);border-radius:999px;padding:5px 11px}
+
+/* toolkit */
+.kit{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:34px}
+.kit-card{border:1px solid var(--hair);border-radius:var(--r);background:var(--white);padding:22px}
+.kit-cat{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--coral-deep);margin:0 0 14px}
+.kit-chips{display:flex;flex-wrap:wrap;gap:8px}
+.kit-chip{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--hair);
+  border-radius:999px;padding:5px 11px}
+.kit-chip.mine{background:var(--grad-warm);border-color:transparent;color:var(--ink);font-weight:500}
+
+/* 30 day roadmap */
+.weeks{display:grid;gap:18px;margin-top:34px}
+.week{border-left:3px solid var(--coral);padding:2px 0 2px 20px}
+.week-n{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--coral-deep);display:block;margin-bottom:8px}
+.week h3{margin:0 0 8px}
+.week p{margin:0;color:var(--muted);font-size:16.5px}
+.daily{list-style:none;padding:0;margin:30px 0 0;display:grid;gap:10px}
+.daily li{display:flex;gap:12px;align-items:baseline;color:var(--muted);font-size:16.5px}
+.daily li::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--coral);flex:none}
+
+.bigline{font-family:var(--display);font-weight:600;font-size:clamp(20px,2.6vw,27px);
+  line-height:1.32;letter-spacing:-.02em;margin:32px 0 0;color:var(--ink)}
+.sign{font-family:var(--mono);font-size:13px;letter-spacing:.04em;color:var(--muted);margin-top:34px}
+.sign a{color:var(--coral-deep);text-decoration:none}
+.sign a:hover{text-decoration:underline}
+
+/* a figure sitting inside the accordion rhythm */
+.acc .fig{padding-left:4px;padding-right:4px}
+
 /* ---- placeholder blocks (delete once real content lands) ---- */
 .todo{
   border:1px dashed var(--peach);background:#FFF3EF;border-radius:14px;
@@ -318,7 +374,7 @@ footer{padding:56px 0 48px;border-top:1px solid var(--hair)}
       <span class="part-num">PART 01</span>
     </div>
     <h2>The foundation</h2>
-    <p class="lede" style="margin-top:20px">Most mindset content is useless. These five are not motivation. They are the mental models that decide whether you make it or quit.</p>
+    <p class="lede" style="margin-top:20px">Most &ldquo;mindset&rdquo; content is useless. These five aren&rsquo;t motivation, they&rsquo;re the mental models that decide whether you make it or quit. Get these wrong and the best tools in the world won&rsquo;t save you.</p>
 
     <div class="acc-tools">
       <button class="acc-all" id="accAll" type="button" aria-controls="acc">Expand all</button>
@@ -329,12 +385,11 @@ footer{padding:56px 0 48px;border-top:1px solid var(--hair)}
       <div class="acc-item">
         <button class="acc-btn" aria-expanded="false">
           <span class="acc-i">01</span>
-          <span>There is no such thing as &ldquo;your thing.&rdquo;</span>
+          <span>There&rsquo;s no such thing as &ldquo;your thing.&rdquo;</span>
           <span class="acc-sign" aria-hidden="true"></span>
         </button>
         <div class="acc-panel"><div class="acc-inner">
-          <p>People waste years searching for the perfect idea or some hidden talent. It does not exist. The search is just a socially acceptable way to keep quitting.</p>
-          <p>Almost any decent idea works if you stay long enough. The winners are not the ones who found their thing. They are the ones who stopped looking and went deep on one.</p>
+          <p>People waste years searching for the perfect idea or some hidden talent. It doesn&rsquo;t exist. The search is just a socially acceptable way to keep quitting: this wasn&rsquo;t it, the next one will be. The truth is almost any decent idea works if you stay long enough. The people who win aren&rsquo;t the ones who found their thing, they&rsquo;re the ones who stopped looking and went deep on one.</p>
         </div></div>
       </div>
 
@@ -345,50 +400,256 @@ footer{padding:56px 0 48px;border-top:1px solid var(--hair)}
           <span class="acc-sign" aria-hidden="true"></span>
         </button>
         <div class="acc-panel"><div class="acc-inner">
-          <p>Every project is exciting for a few months, then it gets hard and boring. Most people read that as a sign they picked wrong and jump. They are wrong.</p>
-          <p>The boring middle is not a signal to leave. It is the filter. Almost everyone leaves at the same point, which is exactly why the reward sits on the other side of it.</p>
+          <p>Every project is exciting for the first few months, then it gets hard and boring and stops feeling special. Most people read that as a sign they picked wrong and jump to the next shiny thing. They&rsquo;re wrong. That boring middle is exactly where everyone else quits, which means it&rsquo;s where the competition disappears. If it were fun and easy the whole way through, everyone would do it. The discomfort is the moat.</p>
         </div></div>
       </div>
 
       <div class="acc-item">
         <button class="acc-btn" aria-expanded="false">
           <span class="acc-i">03</span>
-          <span>Principle three</span>
+          <span>Jumping resets your compounding to zero.</span>
           <span class="acc-sign" aria-hidden="true"></span>
         </button>
         <div class="acc-panel"><div class="acc-inner">
-          <p>Paste the real title and body for principle three here.</p>
+          <p>This is the real cost of starting over. When you stick with one thing, your skills, your audience, your reputation and your understanding all stack on top of each other. Year three you is running on three years of compounded advantage. Every time you jump, you throw all of that away and start as a beginner again. Do that twenty times and you&rsquo;ve got nothing but twenty fresh starts.</p>
         </div></div>
       </div>
+
+
+      <figure class="fig">
+        <svg viewBox="0 0 640 300" role="img" aria-label="Two lines over time. One coral line climbing steeply, labelled stick with one thing. One grey line repeatedly resetting to zero, labelled jumping around.">
+          <line x1="52" y1="252" x2="612" y2="252" stroke="var(--hair)" stroke-width="1"/>
+          <line x1="52" y1="24" x2="52" y2="252" stroke="var(--hair)" stroke-width="1"/>
+          <text x="44" y="256" text-anchor="end" font-family="ui-monospace,monospace" font-size="11" fill="var(--muted)">0</text>
+          <text x="612" y="274" text-anchor="end" font-family="ui-monospace,monospace" font-size="11" fill="var(--muted)">time &#8594;</text>
+          <text x="52" y="18" font-family="ui-monospace,monospace" font-size="11" fill="var(--muted)">progress &#8594;</text>
+          <path d="M52 252 L100 232 L100 252 L148 230 L148 252 L196 228 L196 252 L244 231 L244 252 L292 229 L292 252 L340 232 L340 252 L388 230 L388 252 L436 231"
+                fill="none" stroke="var(--muted)" stroke-width="2" opacity=".5" stroke-linejoin="round"/>
+          <path d="M52 252 C160 250 250 226 330 176 C410 126 470 72 570 40"
+                fill="none" stroke="var(--coral)" stroke-width="3" stroke-linecap="round"/>
+          <text x="566" y="34" text-anchor="end" font-family="ui-monospace,monospace" font-size="12" font-weight="500" fill="var(--coral-deep)">stick with one thing</text>
+          <text x="612" y="214" text-anchor="end" font-family="ui-monospace,monospace" font-size="11.5" fill="var(--muted)">jumping around</text>
+          <text x="612" y="232" text-anchor="end" font-family="ui-monospace,monospace" font-size="11.5" fill="var(--muted)" opacity=".75">always back to zero</text>
+        </svg>
+      </figure>
 
       <div class="acc-item">
         <button class="acc-btn" aria-expanded="false">
           <span class="acc-i">04</span>
-          <span>Principle four</span>
+          <span>Start before you&rsquo;re ready. Ship to learn.</span>
           <span class="acc-sign" aria-hidden="true"></span>
         </button>
         <div class="acc-panel"><div class="acc-inner">
-          <p>Paste the real title and body for principle four here.</p>
+          <p>You will never feel ready. Ready is a feeling that doesn&rsquo;t arrive. Waiting for the perfect plan is just hiding, a clean and productive-looking way to avoid the risk of putting something real into the world. A live, slightly broken thing teaches you more in a day than a perfect plan sat in your head for a month. Start ugly, ship fast, and let reality correct you.</p>
         </div></div>
       </div>
 
       <div class="acc-item">
         <button class="acc-btn" aria-expanded="false">
           <span class="acc-i">05</span>
-          <span>Principle five</span>
+          <span>Discipline beats motivation, every time.</span>
           <span class="acc-sign" aria-hidden="true"></span>
         </button>
         <div class="acc-panel"><div class="acc-inner">
-          <p>Paste the real title and body for principle five here.</p>
+          <p>Motivation is a feeling, and feelings don&rsquo;t show up on the days that matter. Discipline is just doing the thing when no one would know if you didn&rsquo;t. That&rsquo;s the whole skill, and it&rsquo;s the one that transfers to everything. The discipline that gets you training is the same one that ships the product and shows up on day 400 when the excitement is long gone.</p>
         </div></div>
       </div>
 
     </div>
 
-    <div class="todo">
-      <strong>Content gap</strong>
-      <p>Principles 3 to 5, and Parts 02 onward (build with AI, the toolkit, the 30 day plan), are not in this file. Paste them from the playbook source before this goes live, then delete this block. Structure and styling are done, so it is copy in, nothing else.</p>
+    <p class="pull">almost any decent idea works if you stay long enough. pick one and stop looking.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════ PART 02 ═══════════════════ -->
+<section class="band">
+  <div class="read reveal">
+    <div class="part-head">
+      <span class="part-num">PART 02</span>
     </div>
+    <h2>How to build with AI</h2>
+    <p class="lede" style="margin-top:20px">Everyone&rsquo;s building with AI now, so I&rsquo;ll skip the obvious. This is how I actually ship real products solo, one person doing what used to take a team. The tools change every month. The workflow underneath doesn&rsquo;t.</p>
+
+    <h3 style="margin-top:40px">The shift: your job changed.</h3>
+    <p style="margin-top:14px">The code stopped being the hard part. AI writes it faster than you ever could. Your job now is to be the architect: to decide what gets built, how it fits together, and what&rsquo;s actually good. AI is a brilliant builder with zero judgement about what to build. The bottleneck moved from your hands to your judgement, and that&rsquo;s the whole game now.</p>
+
+    <div class="steps">
+      <div class="step">
+        <span class="step-n">01</span>
+        <h3>Get brutally clear before you touch anything.</h3>
+        <p>Most bad output isn&rsquo;t a bad tool, it&rsquo;s a vague ask. Before any code, write down exactly what the thing does and who it&rsquo;s for, in plain language. The clearer you are, the better everything downstream gets. This one habit fixes most of the &ldquo;the AI isn&rsquo;t doing what I want&rdquo; problem.</p>
+      </div>
+      <div class="step">
+        <span class="step-n">02</span>
+        <h3>Make it write the plan first. Approve the plan before any code.</h3>
+        <p>Don&rsquo;t let it dive straight into building. Have it lay out the approach first, read it, and approve it. Catching a bad approach in a paragraph takes a second. Catching it after it&rsquo;s written 400 lines takes an afternoon. This is the single highest-leverage habit I have.</p>
+      </div>
+      <div class="step">
+        <span class="step-n">03</span>
+        <h3>Build the smallest version that proves it&rsquo;s useful.</h3>
+        <p>Not the whole app, the one piece that shows the core idea works. Everything else is a distraction until that part is solid. Ship that, then build outward from something real instead of guessing.</p>
+      </div>
+      <div class="step key">
+        <span class="step-n">04</span>
+        <h3>Never let it do anything you can&rsquo;t undo.</h3>
+        <p>This is the rule that saves you. AI can write code, draft whole features and suggest changes, all of that is reversible. But anything irreversible, merging, deleting, pushing to production, touching live data, you do yourself, deliberately, every time. One confident wrong move on autopilot and you&rsquo;re cleaning up for a week.</p>
+        <span class="step-tag">the rule that saves you</span>
+      </div>
+      <div class="step">
+        <span class="step-n">05</span>
+        <h3>Read every change. Lean on tests.</h3>
+        <p>The trap with AI is how confidently wrong it can be. It&rsquo;ll write something that looks perfect and quietly break something else. Read every change before it goes in, you can&rsquo;t outsource understanding your own project. And lean on tests hard, they&rsquo;re how you catch it breaking the things you weren&rsquo;t even looking at.</p>
+      </div>
+      <div class="step">
+        <span class="step-n">06</span>
+        <h3>Decide what NOT to build.</h3>
+        <p>The weird downside of AI is that it makes adding things so easy you drown in features nobody asked for. The discipline isn&rsquo;t building faster anymore, it&rsquo;s knowing what to leave out. Every feature you skip is time you didn&rsquo;t waste. Ruthless focus is the entire advantage of being solo.</p>
+      </div>
+    </div>
+
+    <p class="pull">ai is a brilliant builder with zero judgement about what to build. that part is still your job.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════ PART 03 ═══════════════════ -->
+<section class="band band-tint">
+  <div class="read reveal">
+    <div class="part-head">
+      <span class="part-num">PART 03</span>
+    </div>
+    <h2>The toolkit</h2>
+    <p class="lede" style="margin-top:20px">These are the tools I actually use to build and run everything, not a list I copied off someone. Start with one in each category. You don&rsquo;t need all of them, you need the few that get you moving. Most have free tiers.</p>
+
+    <div class="kit">
+      <div class="kit-card">
+        <p class="kit-cat">Build &amp; ship</p>
+        <div class="kit-chips">
+          <span class="kit-chip">Claude</span><span class="kit-chip">Cursor</span><span class="kit-chip">Next.js</span><span class="kit-chip">Vercel</span><span class="kit-chip">Neon</span><span class="kit-chip">Clerk</span><span class="kit-chip">Stripe</span><span class="kit-chip">Swift</span>
+        </div>
+      </div>
+      <div class="kit-card">
+        <p class="kit-cat">Sites</p>
+        <div class="kit-chips">
+          <span class="kit-chip">Framer</span><span class="kit-chip">Webflow</span><span class="kit-chip">Carrd</span>
+        </div>
+      </div>
+      <div class="kit-card">
+        <p class="kit-cat">Productivity</p>
+        <div class="kit-chips">
+          <span class="kit-chip mine">TaskBolt</span><span class="kit-chip">Obsidian</span><span class="kit-chip">Notion</span>
+        </div>
+      </div>
+      <div class="kit-card">
+        <p class="kit-cat">Growth</p>
+        <div class="kit-chips">
+          <span class="kit-chip">X</span><span class="kit-chip">Tweet Hunter</span><span class="kit-chip">Typefully</span>
+        </div>
+      </div>
+      <div class="kit-card">
+        <p class="kit-cat">Health</p>
+        <div class="kit-chips">
+          <span class="kit-chip mine">LOKT</span><span class="kit-chip">Whoop</span><span class="kit-chip">Oura</span><span class="kit-chip">Apple Watch</span>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:44px">Growth &amp; audience</h3>
+    <p style="margin-top:14px">Your own face on camera. Underrated. A phone and consistency beats a studio every time.</p>
+
+    <p class="pull">you dont need all the tools. you need the few that get you moving, and the discipline to actually use them.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════ PART 04 ═══════════════════ -->
+<section class="band">
+  <div class="read reveal">
+    <div class="part-head">
+      <span class="part-num">PART 04</span>
+    </div>
+    <h2>The body</h2>
+    <p class="lede" style="margin-top:20px">You can have the best tools and the sharpest plan and still get nowhere running on no sleep and junk. Your work is downstream of your energy. This isn&rsquo;t a fitness program, it&rsquo;s the few basics that actually move the needle.</p>
+
+    <div class="steps">
+      <div class="step">
+        <span class="step-n">01</span>
+        <h3>Your output is downstream of your energy.</h3>
+        <p>Tired, foggy and unhealthy means bad decisions and no consistency. Sort your body and the work gets easier. This isn&rsquo;t separate from building, it&rsquo;s the foundation underneath it.</p>
+      </div>
+      <div class="step">
+        <span class="step-n">02</span>
+        <h3>The basics are boring, and they&rsquo;re all that matters.</h3>
+        <p>Sleep enough. Move every day. Train a few times a week. Eat mostly real food. Get some sunlight and walk. That&rsquo;s the overwhelming majority of it. Everyone wants the advanced hack, almost no one does the basics consistently.</p>
+      </div>
+      <div class="step">
+        <span class="step-n">03</span>
+        <h3>Discipline transfers.</h3>
+        <p>The version of you that trains when you don&rsquo;t feel like it is the same version that ships when you don&rsquo;t feel like it. Health is where you practise the discipline that runs everything else.</p>
+      </div>
+      <div class="step">
+        <span class="step-n">04</span>
+        <h3>Make it a system, not a goal.</h3>
+        <p>&ldquo;Get fit&rdquo; is a goal you&rsquo;ll abandon. A daily, non-negotiable ritual is a system that runs on autopilot. Lower the bar so you can&rsquo;t fail, then never miss. Showing up beats intensity.</p>
+      </div>
+    </div>
+
+    <p class="pull">the version of you that trains when you dont feel like it is the same one that ships when you dont feel like it.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════ PART 05 ═══════════════════ -->
+<section class="band band-tint">
+  <div class="read reveal">
+    <div class="part-head">
+      <span class="part-num">PART 05</span>
+    </div>
+    <h2>Your first 30 days</h2>
+    <p class="lede" style="margin-top:20px">Reading this changes nothing on its own. Here&rsquo;s how to actually start, this week. The goal of month one isn&rsquo;t success, it&rsquo;s momentum and proof to yourself that you&rsquo;ll follow through.</p>
+
+    <div class="weeks">
+      <div class="week">
+        <span class="week-n">Week 1</span>
+        <h3>Pick and set up.</h3>
+        <p>Choose one idea. Not the perfect one, a decent one you&rsquo;ll commit to. Write down in plain language what it does and who it&rsquo;s for. Set up your few tools: one way to build, one place to put it live, one way to take payment or collect emails. Don&rsquo;t over-prepare. One direction, locked.</p>
+      </div>
+      <div class="week">
+        <span class="week-n">Week 2</span>
+        <h3>Build the smallest thing.</h3>
+        <p>Build only the one piece that proves the core idea works. Make it ugly. Get it live and in front of yourself by the end of the week. Shipping something rough beats planning something perfect.</p>
+      </div>
+      <div class="week">
+        <span class="week-n">Week 3</span>
+        <h3>Get it in front of 10 real people.</h3>
+        <p>Not friends being nice. Ten people who&rsquo;d actually use it. Watch what confuses them, listen to what they ask for, ignore the compliments. Real feedback is worth more than another week building in the dark.</p>
+      </div>
+      <div class="week">
+        <span class="week-n">Week 4</span>
+        <h3>Fix the one thing that matters, and start posting.</h3>
+        <p>Fix the single biggest problem the feedback surfaced. Then start posting your journey: what you&rsquo;re building, what you learned, what broke. You don&rsquo;t need an audience to start, you build one by showing up. This is day one of the next 365.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:44px">Then, every day from now on</h3>
+    <ul class="daily">
+      <li>Build something, even if it&rsquo;s tiny.</li>
+      <li>Train or move your body.</li>
+      <li>Post one real thing about what you&rsquo;re doing.</li>
+    </ul>
+
+    <p class="bigline">Do that for a year and you&rsquo;ll be unrecognisable.</p>
+    <p class="pull">the goal of month one isnt success. its proof to yourself that you actually follow through.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════ CLOSE ═══════════════════ -->
+<section class="band" id="close">
+  <div class="read reveal">
+    <p class="eyebrow">One last thing</p>
+    <h2>This is just the start</h2>
+    <p style="margin-top:24px">That&rsquo;s everything I&rsquo;ve got so far. None of it is complicated, and that&rsquo;s the point. The people who make it aren&rsquo;t smarter or luckier, they just pick something and outlast everyone else.</p>
+    <p>I&rsquo;m still in it myself, building solo, figuring it out as I go. I&rsquo;ll keep sharing everything I learn along the way: the tools, the wins, and the things that blow up in my face. This guide is just the start of that.</p>
+    <p>If it helped, come find me. I post the journey every day, and there&rsquo;s a lot more coming.</p>
+    <p>Now close this and go build something.</p>
+    <p class="sign">Reuben Dorje &middot; <a href="https://x.com/reubendorje" target="_blank" rel="me noopener">@reubendorje</a> &middot; build something.</p>
   </div>
 </section>
 
