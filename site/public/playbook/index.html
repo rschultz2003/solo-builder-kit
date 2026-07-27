@@ -309,6 +309,121 @@ footer{padding:56px 0 48px;border-top:1px solid var(--hair)}
   transition:opacity .7s cubic-bezier(.2,.7,.3,1), transform .7s cubic-bezier(.2,.7,.3,1)}
 .reveal.in{opacity:1;transform:none}
 
+/* ============================================================
+   PRINT  —  the PDF is generated from this page, not a separate
+   template, so there is one source of truth for the document.
+   See DECISIONS.md.
+   ============================================================ */
+.pdf-only{display:none}
+
+@media print{
+  @page{ size:A4; margin:20mm 18mm 22mm 18mm; }
+
+  /* without this the coral and the gradients strip out */
+  *,*::before,*::after{
+    -webkit-print-color-adjust:exact !important;
+    print-color-adjust:exact !important;
+  }
+
+  html,body{background:#fff !important;font-size:10.5pt;line-height:1.55}
+  body{overflow:visible !important}
+
+  /* chrome that means nothing on paper */
+  .nav,.progress,.acc-tools,.orb-layer,.hero-orbs,.hero,
+  #get,.capture,footer,.form,.form-note,.form-msg{display:none !important}
+
+  /* the cover: print-only, and the only page without a running footer */
+  .pdf-only{display:block !important}
+  .pdf-cover{
+    break-after:page;min-height:232mm;display:flex;flex-direction:column;
+    justify-content:space-between;padding:0;
+  }
+
+  /* every accordion open, plus/minus gone, the button reading as a heading */
+  .acc-panel{height:auto !important;overflow:visible !important;visibility:visible !important}
+  .acc-panel[inert]{display:block !important}
+  .acc-sign{display:none !important}
+  .acc-btn{padding:18px 0 6px !important;cursor:auto;width:100%}
+  .acc-item{border-bottom:1px solid var(--hair)}
+  .acc-inner{padding:0 0 20px 0 !important}
+
+  /* nothing may split */
+  h1,h2,h3,.acc-btn,.part-head{break-after:avoid;page-break-after:avoid}
+  .step,.kit-card,.week,.fig,.pull,.bigline,.daily{
+    break-inside:avoid;page-break-inside:avoid;
+  }
+  p,li{orphans:3;widows:3}
+
+  /* each Part starts a fresh page */
+  section.band{break-before:page;page-break-before:always;padding:0;background:none !important}
+  section#start{break-before:auto;page-break-before:auto}
+
+  .read,.wrap{max-width:none;padding:0;margin:0}
+  .band-tint{background:none !important}
+  .reveal{opacity:1 !important;transform:none !important}
+
+  /* keep links visible as links on paper */
+  a{color:var(--coral-deep);text-decoration:none}
+
+/* cover, print only. Type and colour are the page's own. */
+  .pdf-cover .cover-title{font-family:var(--display);font-weight:600;font-size:34pt;line-height:1.04;
+    letter-spacing:-.025em;margin:0 0 10mm;
+    background:var(--grad-cool);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .pdf-cover .cover-sub{font-size:14pt;line-height:1.4;color:var(--muted);margin:0 0 6mm;max-width:150mm}
+  .pdf-cover .cover-tag{font-family:var(--mono);font-size:10pt;color:var(--muted);margin:0;max-width:140mm}
+  .pdf-cover .cover-eyebrow{font-family:var(--mono);font-size:9pt;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--coral-deep);margin:12mm 0 0}
+  .pdf-cover .cover-by{font-family:var(--display);font-weight:600;font-size:12pt;margin:0 0 2mm;color:var(--ink)}
+  .pdf-cover .cover-url{font-family:var(--mono);font-size:10pt;color:var(--coral-deep);margin:0}
+  .pdf-cover .cover-orbs{display:block;position:relative;height:46mm}
+  .pdf-cover .cover-orb{position:absolute;border-radius:50%}
+  .pdf-cover .cover-orb.a{width:38mm;height:38mm;right:0;top:0;
+    background:radial-gradient(circle at 32% 28%,#FF8A72 0%,#FF5A4E 46%,#D93A2E 100%)}
+  .pdf-cover .cover-orb.b{width:18mm;height:18mm;right:34mm;top:22mm;
+    background:radial-gradient(circle at 32% 28%,#A79CFF 0%,#7C6CF5 48%,#5B4AD1 100%)}
+  .pdf-cover .cover-orb.c{width:11mm;height:11mm;right:12mm;top:38mm;
+    background:radial-gradient(circle at 32% 28%,#FFD2BE 0%,#FFB39A 48%,#F08F6E 100%)}
+
+  /* Chromium does not fragment grid containers when printing, so .steps,
+     .weeks and .daily each moved to the next page whole and stranded the
+     heading above them on a near-empty page. All three are single-column
+     grids, so block flow with the gap restated as a margin lays out
+     identically and fragments properly. .kit is genuinely multi-column and
+     stays a grid. */
+  .steps,.weeks,.daily{display:block !important}
+  .steps > * + *{margin-top:10px}
+  .weeks > * + *{margin-top:14px}
+  .daily > * + *{margin-top:8px}
+
+  /* the reveal animation leaves a transform on every section, and transformed
+     boxes are monolithic to the fragmenter */
+  .reveal{opacity:1 !important;transform:none !important}
+
+  /* the accordion's generous padding is sized for thumbs, which paper does not
+     have. Reclaiming it is what lets each part's closing pull-quote sit on the
+     same page as the part rather than alone on the next one. */
+  .acc{margin-top:24px}
+  .acc-btn{padding:14px 4px;font-size:15pt}
+  .acc-inner{padding:0 4px 16px 56px}
+  .fig{padding:14px 0 18px}
+
+  .pull{margin:20px 0 0;font-size:15pt;line-height:1.25;break-before:avoid;page-break-before:avoid}
+  .bigline{margin:16px 0 0;font-size:14pt;break-before:avoid;page-break-before:avoid}
+  .fig{break-before:avoid;page-break-before:avoid}
+  h3{break-before:avoid;page-break-before:avoid}
+  section.band > .read > *:last-child{margin-bottom:0}
+
+  .pdf-cta{display:block !important;margin-top:14mm;font-family:var(--mono);font-size:11pt;
+    line-height:1.7;color:var(--muted)}
+  .pdf-cta a{color:var(--coral-deep);font-weight:500}
+
+  .steps{gap:10px}
+  .step{padding:14px 16px;border-radius:10px}
+  .kit{gap:10px}
+  .kit-card{padding:14px 16px;border-radius:10px}
+  .fig{padding:18px 0 20px}
+}
+
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   *{animation:none!important;transition-duration:.001ms!important}
@@ -335,6 +450,25 @@ footer{padding:56px 0 48px;border-top:1px solid var(--hair)}
     </div>
   </div>
 </nav>
+
+<!-- ═══════════════════ PDF COVER (print only) ═══════════════════ -->
+<div class="pdf-only pdf-cover" aria-hidden="true">
+  <div class="cover-top">
+    <span class="cover-orbs">
+      <span class="cover-orb a"></span><span class="cover-orb b"></span><span class="cover-orb c"></span>
+    </span>
+    <p class="cover-eyebrow">a field guide for solo builders</p>
+  </div>
+  <div class="cover-mid">
+    <h1 class="cover-title">The Solo Builder&rsquo;s Playbook</h1>
+    <p class="cover-sub">How to start a business, build with AI, and actually follow through.</p>
+    <p class="cover-tag">everything i wish someone handed me before i wasted years figuring it out.</p>
+  </div>
+  <div class="cover-foot">
+    <p class="cover-by">Reuben Dorje &middot; @reubendorje</p>
+    <p class="cover-url"><a href="https://reubendorje.com">reubendorje.com</a></p>
+  </div>
+</div>
 
 <!-- ═══════════════════ HERO ═══════════════════ -->
 <header class="hero">
@@ -650,6 +784,9 @@ footer{padding:56px 0 48px;border-top:1px solid var(--hair)}
     <p>If it helped, come find me. I post the journey every day, and there&rsquo;s a lot more coming.</p>
     <p>Now close this and go build something.</p>
     <p class="sign">Reuben Dorje &middot; <a href="https://x.com/reubendorje" target="_blank" rel="me noopener">@reubendorje</a> &middot; build something.</p>
+    <p class="pdf-only pdf-cta">More free material, and every new drop:<br>
+      <a href="https://reubendorje.com">reubendorje.com</a> &middot;
+      <a href="https://x.com/reubendorje">@reubendorje</a></p>
   </div>
 </section>
 
