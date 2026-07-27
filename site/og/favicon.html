@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>favicon render source</title>
+<!--
+  Render source for the favicon set. Same Chromium pipeline as card.html.
+  The sphere is deliberately simpler than the web orb: at 16px the full
+  three-layer treatment with its subtle specular turns to mush, so the
+  body gradient is compressed to fewer, harder stops and the highlight is
+  exaggerated well past the web version. Check 16px before anything else.
+-->
+<style>
+  html,body{margin:0;padding:0;background:transparent}
+  .orb{
+    position:relative;width:100vw;height:100vw;border-radius:50%;
+    background:radial-gradient(circle at 34% 28%,
+      #FFB39A 0%,
+      #FF8A72 22%,
+      #FF6A57 44%,
+      #FF5A4E 62%,
+      #D93A2E 86%,
+      #C8341F 100%);
+  }
+  /* exaggerated specular: bigger, brighter and higher-contrast than the
+     web orb's ::after, because at 16px it is the only thing that still
+     reads as "sphere" rather than "dot" */
+  .orb::after{
+    content:"";position:absolute;left:16%;top:12%;width:34%;height:28%;
+    border-radius:50%;
+    background:radial-gradient(ellipse at 45% 42%,
+      rgba(255,255,255,1) 0%,
+      rgba(255,255,255,.88) 26%,
+      rgba(255,255,255,.28) 58%,
+      rgba(255,255,255,0) 80%);
+  }
+  /* terminator: keeps the bottom-right edge from flattening out */
+  .orb::before{
+    content:"";position:absolute;inset:0;border-radius:50%;
+    background:radial-gradient(circle at 72% 78%,
+      rgba(150,32,18,.42) 0%,
+      rgba(150,32,18,0) 58%);
+  }
+</style>
+</head>
+<body>
+<div class="orb"></div>
+</body>
+</html>
