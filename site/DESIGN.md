@@ -101,4 +101,5 @@ Push on these:
   endpoint is set in both pages and the two values match. Keep them identical.
 - `/playbook` has principles 01 and 02 written. Principles 03 to 05 and Parts 02 onward are
   placeholders marked with a `.todo` block. Structure is done, it is copy-in only.
-- No favicon yet.
+- ~~No favicon yet.~~ Shipped: `favicon.svg`, `favicon.ico`, `apple-touch-icon.png`,
+  rendered from the orb mark simplified for small sizes. See `og/favicon-proof.png`.

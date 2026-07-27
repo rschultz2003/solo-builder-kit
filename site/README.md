@@ -37,7 +37,11 @@ Three things, in order:
    written. Principles 03 to 05 and Parts 02 onward are placeholders, marked with a
    `.todo` block. Paste the real content, delete the `.todo` block.
 
-3. **Add a favicon.** Not present yet.
+3. ~~**Add a favicon.**~~ Done. `favicon.svg`, `favicon.ico` (32x32) and
+   `apple-touch-icon.png` (180x180) ship in `public/`, linked from both pages.
+   Render source is `og/favicon.html`; `og/favicon-proof.png` is the 16/32/180
+   check sheet. Re-run that check if the mark ever changes: favicon work fails
+   at 16px, not at 180.
 
 ## Deploy
 
